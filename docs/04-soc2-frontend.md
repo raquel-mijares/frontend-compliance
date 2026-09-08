@@ -57,3 +57,11 @@ cambios sin el control. El auditor lo va a ver en el historial.
 
 Los controles hay que encenderlos **antes** de que empiece el periodo, no antes
 de que acabe.
+
+## CI de ejemplo
+
+El workflow que genera esa evidencia está en
+[`docs/ci.example.yml`](ci.example.yml). Cópialo a `.github/workflows/ci.yml`.
+
+Corre typecheck, tests y `npm audit --audit-level=high` en cada PR. Los dos
+primeros mantienen los controles vivos; el tercero produce el artefacto fechado.
