@@ -1,30 +1,30 @@
-# Privacidad infantil
+# Children's privacy
 
-Si tu producto tiene contenido dirigido a menores, las reglas cambian de forma
-que rompen suposiciones normales del front-end. No es "compliance con más
-papeleo": hay cosas que directamente no puedes hacer.
+If your product carries content aimed at children, the rules change in ways that
+break normal front-end assumptions. This isn't "compliance with extra
+paperwork": there are things you simply cannot do.
 
-## Lo que cambia
+## What changes
 
-Bajo **COPPA** (EE. UU., menores de 13):
+Under **COPPA** (US, under 13):
 
-- Publicidad **contextual sí, comportamental no**. Nada de perfilado.
-- Consentimiento parental verificable antes de recoger datos personales.
-- Los identificadores persistentes cuentan como datos personales. Eso incluye
-  cookies, device IDs y publicitarios.
-- Minimización real: solo lo estrictamente necesario para la actividad.
+- Contextual advertising **yes**, behavioural advertising **no**. No profiling.
+- Verifiable parental consent before collecting personal information.
+- Persistent identifiers count as personal information. That includes cookies,
+  device IDs and advertising IDs.
+- Real minimization: only what the activity strictly needs.
 
-Bajo **GDPR art. 8** (UE), el umbral de consentimiento propio es 16 por defecto,
-y cada estado miembro puede bajarlo hasta 13. Si operas en varios países, el
-umbral es distinto según dónde esté el usuario.
+Under **GDPR art. 8** (EU), the age of consent defaults to 16, and each member
+state may lower it to 13. If you operate across countries, the threshold depends
+on where the user is.
 
-## El patrón que funciona: dos contextos, no un flag
+## The pattern that works: two contexts, not a flag
 
-La tentación es un booleano `isKids` que apaga cosas. Se rompe en cuanto alguien
-añade una etiqueta nueva y se le olvida el `if`.
+The temptation is an `isKids` boolean that switches things off. It breaks the
+moment someone adds a new tag and forgets the `if`.
 
-Lo que aguanta una auditoría es tratarlo como **dos contextos de ejecución
-distintos**, con inventarios de etiquetas separados:
+What survives an audit is treating it as **two distinct execution contexts**,
+with separate tag inventories:
 
 ```ts
 const TAGS = {
@@ -33,45 +33,46 @@ const TAGS = {
 };
 ```
 
-El contexto infantil arranca de una lista vacía y solo se le añade lo que se ha
-revisado explícitamente. Si alguien registra una etiqueta nueva sin decidir
-conscientemente que va en `kids`, no entra. El fallo por omisión es hacia el
-lado seguro.
+The kids context starts from an empty list and only gets what has been reviewed
+explicitly. If someone registers a new tag without consciously deciding it
+belongs in `kids`, it doesn't get in. Failure by omission lands on the safe side.
 
-## Dónde se cuela igualmente
+## Where it leaks anyway
 
-- **Reproductor de vídeo.** El SDK del reproductor manda telemetría propia y
-  suele traer su propio ID publicitario. Hay que configurarlo aparte del resto.
-- **Smart TV.** Las plataformas tienen sus propios identificadores. En Roku,
-  Tizen o webOS eso no lo controla tu código de aplicación, lo controla el
-  manifiesto y la configuración de la plataforma.
-- **Contenido incrustado.** Un embed de YouTube estándar deja cookies. Existe
-  `youtube-nocookie.com` justo para esto.
-- **Fuentes y CDN.** Cargar una fuente desde un CDN de terceros transmite la IP.
-  Autohospédalas.
-- **Crash reporting.** Sentry y similares capturan más contexto del que crees.
+- **Video player.** The player SDK sends its own telemetry and usually brings
+  its own advertising identifier. It has to be configured separately from
+  everything else.
+- **Smart TV.** Platforms have their own identifiers. On Roku, Tizen or webOS
+  that isn't controlled by your application code — it's the manifest and the
+  platform configuration.
+- **Embedded content.** A standard YouTube embed sets cookies.
+  `youtube-nocookie.com` exists for exactly this.
+- **Fonts and CDNs.** Loading a font from a third-party CDN transmits the IP.
+  Self-host them.
+- **Crash reporting.** Sentry and friends capture more context than you think.
 
-## Age gating que no es teatro
+## Age gating that isn't theatre
 
-Un selector de fecha de nacimiento no es consentimiento parental verificable, y
-además cualquier niño lo pasa. Lo que hace la diferencia técnica:
+A date-of-birth picker is not verifiable parental consent, and any child gets
+past it. What makes the technical difference:
 
-- **Neutral**, sin sesgo. Pedir la fecha, no "¿tienes más de 13?" con el sí
-  preseleccionado.
-- **No reintentable.** Si el resultado es menor, persistir la decisión. Sin eso,
-  recarga y prueba otra fecha.
-- **Aplicado en servidor.** Si el gate solo vive en el cliente, no existe.
+- **Neutral**, unbiased. Ask for the date, not "are you over 13?" with yes
+  pre-selected.
+- **Not retryable.** If the result is under age, persist the decision. Without
+  that, reload and try another date.
+- **Enforced server-side.** If the gate only lives on the client, it doesn't
+  exist.
 
-## Qué mirar antes de dar por hecho que cumples
+## What to check before assuming you comply
 
-- [ ] El inventario de etiquetas del contexto infantil está escrito y revisado
-- [ ] Ninguna etiqueta se registra sola: añadir una requiere elegir contexto
-- [ ] El SDK del reproductor tiene configuración específica de menores
-- [ ] Los embeds usan variantes sin cookies
-- [ ] Fuentes y assets autohospedados
-- [ ] El gate de edad persiste y se aplica en servidor
-- [ ] Hay un test que falla si aparece una petición no permitida en el contexto
-      infantil
+- [ ] The kids-context tag inventory is written down and reviewed
+- [ ] No tag registers itself: adding one requires picking a context
+- [ ] The player SDK has kids-specific configuration
+- [ ] Embeds use cookieless variants
+- [ ] Fonts and assets are self-hosted
+- [ ] The age gate persists and is enforced server-side
+- [ ] There's a test that fails if a disallowed request appears in the kids
+      context
 
-Ese último punto es el que hace que lo anterior siga siendo verdad dentro de un
-año. La lista sin el test es un documento; con el test es un control.
+That last one is what keeps the rest true a year from now. The list without the
+test is a document; with the test it's a control.
