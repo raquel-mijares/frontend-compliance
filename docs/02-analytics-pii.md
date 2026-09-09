@@ -1,30 +1,30 @@
-# Analítica sin filtrar datos personales
+# Analytics without leaking personal data
 
-La analítica filtra PII casi siempre por accidente, y casi siempre por la misma
-puerta: **la URL**.
+Analytics leaks PII almost always by accident, and almost always through the
+same door: **the URL**.
 
-## El caso que se repite
+## The case that keeps happening
 
 ```
 /reset-password?token=abc123&email=ana@example.com
 ```
 
-GA4 recoge `page_location` completa por defecto. Ese email acaba de entrar en tu
-propiedad de analítica, que es un sistema de un tercero, probablemente en otra
-jurisdicción, con una política de retención que tú no controlas. Y GA4 no lo
-quiere: mandar PII va contra sus condiciones y te pueden purgar la propiedad.
+GA4 collects the full `page_location` by default. That email has just entered
+your analytics property — a third-party system, probably in another
+jurisdiction, with a retention policy you don't control. And GA4 doesn't want
+it: sending PII violates their terms and they can purge the property.
 
-Lo mismo con los referrers. Una página con el email en la query enlaza a otra, y
-el email viaja en el `Referer` a todos los terceros de la página destino.
+Same with referrers. A page with the email in the query links out to another,
+and the email travels in the `Referer` header to every third party on the
+destination page.
 
-## Regla práctica
+## Practical rule
 
-**Nunca metas identificadores en la query string.** Ni email, ni teléfono, ni
-nombre, ni el token de sesión. Van en el cuerpo del POST o en el path como
-identificador opaco.
+**Never put identifiers in the query string.** Not email, not phone, not name,
+not the session token. They go in the POST body, or in the path as an opaque id.
 
-Si heredas un sistema que ya lo hace y no lo puedes cambiar hoy, sanea antes de
-que llegue a la etiqueta:
+If you've inherited a system that already does it and can't change that today,
+sanitize before it reaches the tag:
 
 ```js
 const PII_PARAMS = ['email', 'phone', 'token', 'name', 'ssn'];
@@ -38,53 +38,51 @@ function sanitizeUrl(raw) {
 }
 ```
 
-Es un parche. El arreglo es no ponerlo ahí.
+That's a patch. The fix is not putting it there.
 
-## Los otros sitios por donde se escapa
+## The other ways it escapes
 
-| Vector | Cómo pasa |
+| Vector | How it happens |
 |---|---|
-| Títulos de página | `document.title = "Pedido de Ana García"` → va en cada evento |
-| Parámetros de evento | `track('signup', { email })` porque hacía falta para depurar |
-| Dimensiones personalizadas | Alguien mapea `user_email` "temporalmente" |
-| Grabación de sesión | Hotjar/FullStory capturando un formulario sin enmascarar |
-| Mensajes de error | `logError("fallo el pago de ana@example.com")` |
-| `user_id` | Correcto en GA4 — pero tiene que ser opaco, no el email |
+| Page titles | `document.title = "Ana García's order"` → ships on every event |
+| Event parameters | `track('signup', { email })` because it was handy for debugging |
+| Custom dimensions | Someone maps `user_email` "temporarily" |
+| Session recording | Hotjar/FullStory capturing an unmasked form |
+| Error messages | `logError("payment failed for ana@example.com")` |
+| `user_id` | Correct in GA4 — but it has to be opaque, not the email |
 
-## Server-side no es una tirita
+## Server-side is not a band-aid
 
-Mover las etiquetas a un contenedor de servidor o a CAPI mejora fiabilidad y te
-da un punto donde sanear. No te exime de nada: sigues tratando datos personales,
-sigues necesitando base legal, y el consentimiento sigue aplicando.
+Moving tags to a server container or to CAPI improves reliability and gives you
+one place to sanitize. It exempts you from nothing: you're still processing
+personal data, you still need a legal basis, and consent still applies.
 
-Lo que sí resuelve: te da **un solo sitio** donde inspeccionar y redactar antes
-de que salga a un tercero. Eso es mucho, pero es higiene, no cumplimiento.
+What it does solve: **a single point** where you can inspect and redact before
+anything leaves for a third party. That's a lot, but it's hygiene, not
+compliance.
 
-## Hashear no es anonimizar
+## Hashing is not anonymizing
 
-Un `SHA-256` de un email es un **seudónimo**, no un anónimo. Es determinista y
-el espacio de emails es enumerable: cualquiera con una lista puede revertirlo por
-fuerza bruta. Bajo GDPR sigue siendo dato personal (considerando 26).
+A `SHA-256` of an email is a **pseudonym**, not an anonym. It's deterministic
+and the email space is enumerable: anyone with a list can brute-force it back.
+Under GDPR it remains personal data (recital 26).
 
-Sirve para dos cosas reales: que el proveedor haga match sin ver el original, y
-que reduzcas el daño si hay filtración. No sirve para decir "ya no es PII".
+It's good for two real things: letting a vendor match without seeing the
+original, and reducing harm if there's a breach. It is not good for claiming
+"this isn't PII any more."
 
-Ver [`src/hash.ts`](../src/hash.ts) para la normalización — que es donde falla
-todo el mundo, porque sin normalizar previa los hashes no casan y la tasa de
-match se hunde.
+## Implementation notes
 
-## Cómo lo verificas
+On [`src/hash.ts`](../src/hash.ts): normalizing before hashing isn't cosmetic.
+`"  Ana@Example.COM "` and `"ana@example.com"` produce different hashes, the
+vendor reconciles nothing, and your match rate collapses without anything
+visibly failing. It's the number one cause of bad CAPI attribution.
 
-No mirando el Network tab una vez. Un test que navega, dispara los flujos
-sensibles, y **falla** si alguna petición saliente contiene algo con forma de
-email o de teléfono. Ver [`tests/no-pii.spec.ts`](../tests/no-pii.spec.ts).
+And repeating the point above because it gets forgotten: hashing reduces
+exposure, it doesn't remove it. Still personal data, still needs a legal basis.
 
-## Notas de la implementación
+## How you verify it
 
-Sobre [`src/hash.ts`](../src/hash.ts): la normalización previa al hash no es
-cosmética. `"  Ana@Example.COM "` y `"ana@example.com"` producen hashes
-distintos, el proveedor no reconcilia nada y la tasa de match se hunde sin que
-nada falle visiblemente. Es la causa número uno de atribución mala en CAPI.
-
-Y repitiendo lo de arriba porque se olvida: hashear reduce exposición, no la
-elimina. Sigue siendo dato personal y sigue necesitando base legal.
+Not by checking the Network tab once. A test that navigates, exercises the
+sensitive flows, and **fails** if any outbound request contains something shaped
+like an email or a phone number. See [`tests/no-pii.spec.ts`](../tests/no-pii.spec.ts).
