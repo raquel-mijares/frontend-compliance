@@ -78,3 +78,13 @@ match se hunde.
 No mirando el Network tab una vez. Un test que navega, dispara los flujos
 sensibles, y **falla** si alguna petición saliente contiene algo con forma de
 email o de teléfono. Ver [`tests/no-pii.spec.ts`](../tests/no-pii.spec.ts).
+
+## Notas de la implementación
+
+Sobre [`src/hash.ts`](../src/hash.ts): la normalización previa al hash no es
+cosmética. `"  Ana@Example.COM "` y `"ana@example.com"` producen hashes
+distintos, el proveedor no reconcilia nada y la tasa de match se hunde sin que
+nada falle visiblemente. Es la causa número uno de atribución mala en CAPI.
+
+Y repitiendo lo de arriba porque se olvida: hashear reduce exposición, no la
+elimina. Sigue siendo dato personal y sigue necesitando base legal.

@@ -100,3 +100,20 @@ petición a un dominio de terceros. Ver [`tests/consent.spec.ts`](../tests/conse
 
 Esto es lo que convierte "cumplimos" en algo verificable en CI en vez de una
 afirmación en una reunión.
+
+## Notas de la implementación
+
+Sobre [`src/loader.ts`](../src/loader.ts): es deliberadamente la única cosa del
+código base que inyecta scripts de terceros. Si un componente lo hace por su
+cuenta el gating deja de ser verificable, y el test de CI ya no demuestra nada.
+Esa restricción es el control; el código solo la expresa.
+
+`reloadOnWithdrawal` existe porque retirar el consentimiento no descarga un
+script ya ejecutado. Quitar la etiqueta del DOM no deshace lo que corrió. Si tu
+política promete que dejas de rastrear al instante, hace falta recargar.
+
+Sobre [`src/consent.ts`](../src/consent.ts): los bloques `catch` vacíos alrededor
+del almacenamiento son a propósito. En modo privado o con el almacenamiento
+lleno, `setItem` lanza. El estado se queda en memoria esa sesión y se vuelve a
+preguntar en la siguiente — que es el comportamiento correcto. Lo que nunca hay
+que hacer es tratar el fallo de escritura como consentimiento concedido.
