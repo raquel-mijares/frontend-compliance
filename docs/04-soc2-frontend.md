@@ -1,67 +1,66 @@
-# Lo que un auditor SOC 2 te pide del front-end
+# What a SOC 2 auditor asks of the front-end
 
-SOC 2 no es una certificación con una lista fija: es una auditoría de que los
-controles que **tú** dijiste que tienes, funcionan, de forma consistente, durante
-un periodo. Type I es un momento; Type II es normalmente entre 3 y 12 meses.
+SOC 2 isn't a certification with a fixed checklist: it's an audit that the
+controls **you** said you have actually work, consistently, over a period.
+Type I is a point in time; Type II is typically 3 to 12 months.
 
-Eso cambia lo que significa "estar listo". No es arreglarlo la semana antes. Es
-que el control haya estado funcionando todo el periodo y puedas demostrarlo.
+That changes what "being ready" means. It isn't fixing it the week before. It's
+that the control has been working the whole period and you can show it.
 
-## La parte que acaba siendo del front-end
+## The part that ends up being front-end
 
-**Control de acceso.** Ocultar un botón no es control de acceso. Si el endpoint
-responde a quien no debe, da igual lo que enseñe la interfaz. Ocultar es UX; el
-control está en el servidor. El auditor lo prueba llamando al endpoint.
+**Access control.** Hiding a button is not access control. If the endpoint
+answers someone who shouldn't be asking, it doesn't matter what the interface
+shows. Hiding is UX; the control is on the server. The auditor tests it by
+calling the endpoint.
 
-Lo que sí aporta el cliente: que los estados de permiso sean explícitos y
-testeables, no `v-if` dispersos por veinte componentes.
+What the client does contribute: permission states that are explicit and
+testable, not `v-if` scattered across twenty components.
 
-**Trazabilidad de acciones sensibles.** Cambios de permisos, exportaciones de
-datos, borrados. El registro lo escribe el servidor, pero el cliente tiene que
-mandar contexto suficiente para que la entrada signifique algo.
+**Traceability of sensitive actions.** Permission changes, data exports,
+deletions. The server writes the log, but the client has to send enough context
+for the entry to mean anything.
 
-**Sesión.** Timeout por inactividad, cierre de sesión que de verdad invalida en
-servidor, y no dejar datos sensibles en `localStorage` sobreviviendo al logout.
+**Session handling.** Idle timeout, a logout that actually invalidates
+server-side, and no sensitive data left in `localStorage` surviving the logout.
 
-**Dependencias.** Aquí es donde más se falla en front-end. Es criterio de
-seguridad y tu `node_modules` es superficie de ataque: `npm audit` en CI, lockfile
-comprometido, y un proceso escrito para parchear con una ventana definida.
+**Dependencies.** This is where front-end fails most. It's a security criterion
+and your `node_modules` is attack surface: `npm audit` in CI, a committed
+lockfile, and a written process for patching within a defined window.
 
-**Gestión de cambios.** Que cada cambio en producción sea rastreable hasta una
-revisión aprobada. En la práctica: rama protegida, PR obligatorio, revisor
-distinto del autor, CI en verde. Si alguien puede hacer push directo a `main`,
-ese control no existe.
+**Change management.** Every production change traceable to an approved review.
+In practice: protected branch, mandatory PR, a reviewer who isn't the author,
+green CI. If anyone can push straight to `main`, that control doesn't exist.
 
-## Evidencia > intención
+## Evidence beats intent
 
-La diferencia entre un control que pasa y uno que no suele ser si genera
-**artefactos con fecha** de forma automática.
+The difference between a control that passes and one that doesn't is usually
+whether it produces **dated artifacts** automatically.
 
-| Control | Evidencia débil | Evidencia que pasa |
+| Control | Weak evidence | Evidence that passes |
 |---|---|---|
-| Revisión de código | "Revisamos todo" | Rama protegida + historial de PRs del periodo |
-| Escaneo de dependencias | "Usamos npm audit" | Job de CI, con resultados archivados |
-| Gating de consentimiento | Captura del banner | Test en CI que falla si dispara antes |
-| Control de acceso | Documento de roles | Tests de autorización por rol, en cada build |
+| Code review | "We review everything" | Protected branch + PR history for the period |
+| Dependency scanning | "We use npm audit" | A CI job, with results archived |
+| Consent gating | Screenshot of the banner | A CI test that fails if it fires early |
+| Access control | A roles document | Per-role authorization tests, every build |
 
-El patrón: **convertir política en test.** Un test que corre en cada PR y falla
-cuando el control deja de cumplirse produce evidencia continua sin que nadie
-tenga que acordarse de recopilarla. Esto es también, casualmente, lo que hace
-que el control siga siendo verdad.
+The pattern: **turn policy into a test.** A test that runs on every PR and fails
+when the control stops holding produces continuous evidence without anyone
+having to remember to collect it. It also happens to be what keeps the control
+true.
 
-## El error de calendario
+## The scheduling mistake
 
-Empezar tres semanas antes de la ventana de auditoría. Si el periodo Type II
-empieza en enero y activas la protección de rama en marzo, tienes dos meses de
-cambios sin el control. El auditor lo va a ver en el historial.
+Starting three weeks before the audit window. If your Type II period starts in
+January and you enable branch protection in March, you have two months of
+changes without the control. The auditor will see it in the history.
 
-Los controles hay que encenderlos **antes** de que empiece el periodo, no antes
-de que acabe.
+Controls have to be switched on **before** the period starts, not before it ends.
 
-## CI de ejemplo
+## Example CI
 
-El workflow que genera esa evidencia está en
-[`docs/ci.example.yml`](ci.example.yml). Cópialo a `.github/workflows/ci.yml`.
+The workflow that generates that evidence is in
+[`ci.example.yml`](ci.example.yml). Copy it to `.github/workflows/ci.yml`.
 
-Corre typecheck, tests y `npm audit --audit-level=high` en cada PR. Los dos
-primeros mantienen los controles vivos; el tercero produce el artefacto fechado.
+It runs typecheck, tests and `npm audit --audit-level=high` on every PR. The
+first two keep the controls alive; the third produces the dated artifact.
