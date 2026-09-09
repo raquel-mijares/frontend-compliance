@@ -18,31 +18,31 @@ describe('ConsentState', () => {
     storage = new MemoryStorage();
   });
 
-  it('arranca en unknown, no en denied', () => {
+  it('starts at unknown, not denied', () => {
     const c = new ConsentState(storage);
     expect(c.get('analytics')).toBe('unknown');
     expect(c.resolved).toBe(false);
   });
 
-  it('no permite nada no esencial antes de decidir', () => {
+  it('allows nothing non-essential before a decision', () => {
     const c = new ConsentState(storage);
     expect(c.allows('analytics')).toBe(false);
     expect(c.allows('advertising')).toBe(false);
   });
 
-  it('siempre permite lo estrictamente necesario', () => {
+  it('always allows strictly necessary', () => {
     const c = new ConsentState(storage);
     expect(c.allows('necessary')).toBe(true);
   });
 
-  it('distingue denied de unknown', () => {
+  it('distinguishes denied from unknown', () => {
     const c = new ConsentState(storage);
     c.rejectAll();
     expect(c.get('analytics')).toBe('denied');
     expect(c.resolved).toBe(true);
   });
 
-  it('persiste la decisión con versión y marca de tiempo', () => {
+  it('persists the decision with version and timestamp', () => {
     const c = new ConsentState(storage);
     c.set({ analytics: true, advertising: false });
     const saved = JSON.parse(storage.getItem('consent')!);
@@ -51,7 +51,7 @@ describe('ConsentState', () => {
     expect(Date.parse(saved.timestamp)).not.toBeNaN();
   });
 
-  it('invalida el consentimiento de una versión anterior de la política', () => {
+  it('invalidates consent from an earlier policy version', () => {
     storage.setItem('consent', JSON.stringify({
       version: POLICY_VERSION - 1,
       timestamp: new Date().toISOString(),
@@ -61,7 +61,7 @@ describe('ConsentState', () => {
     expect(c.get('analytics')).toBe('unknown');
   });
 
-  it('retirar deja el estado en unknown, no en granted', () => {
+  it('withdrawal leaves state at unknown, not granted', () => {
     const c = new ConsentState(storage);
     c.acceptAll();
     c.withdraw();
@@ -69,13 +69,13 @@ describe('ConsentState', () => {
     expect(c.allows('analytics')).toBe(false);
   });
 
-  it('no revienta si el almacenamiento tiene basura', () => {
+  it('does not blow up on corrupt storage', () => {
     storage.setItem('consent', '{no es json');
     const c = new ConsentState(storage);
     expect(c.get('analytics')).toBe('unknown');
   });
 
-  it('traduce a las cuatro señales de Consent Mode v2', () => {
+  it('maps to the four Consent Mode v2 signals', () => {
     const c = new ConsentState(storage);
     c.set({ analytics: true, advertising: false });
     expect(c.toGoogleConsentMode()).toEqual({

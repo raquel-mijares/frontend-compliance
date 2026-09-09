@@ -2,8 +2,8 @@ import { test, expect } from '@playwright/test';
 import { isTracker } from './third-party-hosts';
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3000';
-test.describe('gating de consentimiento', () => {
-  test('no contacta con ningún tracker antes de decidir', async ({ page }) => {
+test.describe('consent gating', () => {
+  test('contacts no tracker before a decision', async ({ page }) => {
     const hits: string[] = [];
     page.on('request', (req) => {
       if (isTracker(req.url())) hits.push(req.url());
@@ -12,10 +12,10 @@ test.describe('gating de consentimiento', () => {
     await page.goto(BASE);
     await page.waitForLoadState('networkidle');
 
-    expect(hits, `peticiones a terceros antes del consentimiento:\n${hits.join('\n')}`).toEqual([]);
+    expect(hits, `third-party requests before consent:\n${hits.join('\n')}`).toEqual([]);
   });
 
-  test('no escribe cookies no esenciales antes de decidir', async ({ page, context }) => {
+  test('writes no non-essential cookies before a decision', async ({ page, context }) => {
     await page.goto(BASE);
     await page.waitForLoadState('networkidle');
 
@@ -25,36 +25,36 @@ test.describe('gating de consentimiento', () => {
     expect(nonEssential.map((c) => c.name)).toEqual([]);
   });
 
-  test('rechazar mantiene todo apagado', async ({ page }) => {
+  test('rejecting keeps everything off', async ({ page }) => {
     const hits: string[] = [];
     page.on('request', (req) => {
       if (isTracker(req.url())) hits.push(req.url());
     });
 
     await page.goto(BASE);
-    await page.getByRole('button', { name: /rechazar|reject/i }).click();
+    await page.getByRole('button', { name: /reject/i }).click();
     await page.waitForLoadState('networkidle');
 
     expect(hits).toEqual([]);
   });
 
-  test('aceptar sí carga la analítica', async ({ page }) => {
+  test('accepting does load analytics', async ({ page }) => {
     const hits: string[] = [];
     page.on('request', (req) => {
       if (isTracker(req.url())) hits.push(req.url());
     });
 
     await page.goto(BASE);
-    await page.getByRole('button', { name: /aceptar|accept/i }).click();
+    await page.getByRole('button', { name: /accept/i }).click();
     await page.waitForLoadState('networkidle');
 
     expect(hits.length).toBeGreaterThan(0);
   });
 
-  test('rechazar cuesta lo mismo que aceptar', async ({ page }) => {
+  test('rejecting costs the same as accepting', async ({ page }) => {
     await page.goto(BASE);
-    const accept = page.getByRole('button', { name: /aceptar|accept/i });
-    const reject = page.getByRole('button', { name: /rechazar|reject/i });
+    const accept = page.getByRole('button', { name: /accept/i });
+    const reject = page.getByRole('button', { name: /reject/i });
 
     await expect(accept).toBeVisible();
     await expect(reject).toBeVisible();
