@@ -1,15 +1,3 @@
-/**
- * Normalización y hash para APIs de conversión del lado servidor (Meta CAPI,
- * Google Enhanced Conversions).
- *
- * El hash sin normalizar previa es la causa número uno de tasas de match malas:
- * "  Ana@Example.COM " y "ana@example.com" dan hashes distintos y el proveedor
- * no reconcilia nada. Normalizar no es cosmético, es lo que hace que funcione.
- *
- * Esto reduce exposición, no la elimina: un hash de email sigue siendo un
- * identificador estable y bajo GDPR sigue siendo dato personal. Necesita base
- * legal igual.
- */
 
 export function normalizeEmail(input: string): string {
   return input.trim().toLowerCase();

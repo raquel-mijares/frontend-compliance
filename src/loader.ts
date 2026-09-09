@@ -7,10 +7,6 @@ export interface Tag {
   attrs?: Record<string, string>;
 }
 
-/**
- * La única puerta. Ningún componente inyecta scripts de terceros por su cuenta;
- * si lo hace, el gating deja de ser verificable.
- */
 export class TagLoader {
   private loaded = new Set<string>();
 
@@ -46,11 +42,6 @@ export class TagLoader {
     this.loaded.add(tag.id);
   }
 
-  /**
-   * Retirar el consentimiento no "descarga" un script ya ejecutado. Hay que
-   * recargar. Si prometes en la política que dejas de rastrear al instante,
-   * esto es lo que lo cumple de verdad.
-   */
   reloadOnWithdrawal(): void {
     if (this.loaded.size > 0) this.doc.location.reload();
   }

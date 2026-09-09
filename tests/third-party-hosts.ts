@@ -1,4 +1,3 @@
-/** Dominios que no deben recibir una sola petición antes del consentimiento. */
 export const TRACKER_HOSTS = [
   'google-analytics.com',
   'analytics.google.com',

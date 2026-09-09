@@ -2,12 +2,6 @@ import { test, expect } from '@playwright/test';
 import { isTracker } from './third-party-hosts';
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3000';
-
-/**
- * El test que convierte "cumplimos" en algo que falla en CI cuando deja de ser
- * verdad. Si alguien añade un <script> de un proveedor saltándose el TagLoader,
- * esto se pone rojo en el PR y no seis meses después en la auditoría.
- */
 test.describe('gating de consentimiento', () => {
   test('no contacta con ningún tracker antes de decidir', async ({ page }) => {
     const hits: string[] = [];
@@ -54,8 +48,6 @@ test.describe('gating de consentimiento', () => {
     await page.getByRole('button', { name: /aceptar|accept/i }).click();
     await page.waitForLoadState('networkidle');
 
-    // Verificar el caso positivo importa: un gate que bloquea siempre "pasa"
-    // el test de arriba y rompe el producto sin que nadie se entere.
     expect(hits.length).toBeGreaterThan(0);
   });
 
@@ -64,7 +56,6 @@ test.describe('gating de consentimiento', () => {
     const accept = page.getByRole('button', { name: /aceptar|accept/i });
     const reject = page.getByRole('button', { name: /rechazar|reject/i });
 
-    // Ambos visibles al primer nivel, sin abrir "preferencias".
     await expect(accept).toBeVisible();
     await expect(reject).toBeVisible();
   });

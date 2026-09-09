@@ -1,15 +1,9 @@
 import { test, expect } from '@playwright/test';
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:3000';
-
 const EMAIL = /[\w.+-]+@[\w-]+\.[\w.]{2,}/;
 const PHONE = /(?:\+?\d[\s.-]?){9,}/;
 
-/**
- * Busca PII en lo que sale hacia fuera. No prueba que sea imposible filtrar
- * -- ningún test hace eso -- pero atrapa la regresión típica: alguien mete el
- * email en la query string para depurar y se queda.
- */
 test('no manda PII a terceros en el flujo de registro', async ({ page }) => {
   const leaks: { url: string; where: string }[] = [];
 

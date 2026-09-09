@@ -55,8 +55,6 @@ export class ConsentState {
     try {
       this.storage.setItem(STORAGE_KEY, JSON.stringify(this.record));
     } catch {
-      // Modo privado o almacenamiento lleno: el estado vive en memoria esta
-      // sesión y se vuelve a preguntar en la siguiente. Nunca asumir concedido.
     }
     this.emit();
   }
@@ -73,7 +71,6 @@ export class ConsentState {
     try {
       this.storage.removeItem(STORAGE_KEY);
     } catch {
-      // ignorado a propósito
     }
     this.record = null;
     this.emit();
