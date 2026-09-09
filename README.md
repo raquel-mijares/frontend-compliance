@@ -1,41 +1,41 @@
 # frontend-compliance
 
-Notas de ingeniería sobre la parte del compliance que acaba tocándole al front-end:
-consentimiento, analítica sin PII, privacidad infantil y la evidencia que pide una
-auditoría SOC 2.
+Engineering notes on the part of compliance that ends up landing on the
+front-end: consent, analytics without PII, children's privacy, and the evidence
+a SOC 2 audit actually asks for.
 
-No es asesoría legal. Es lo que he tenido que resolver escribiendo interfaces en
-productos auditados — SOC 2, ISO 27001, GDPR e HIPAA en compliance de seguridad;
-COPPA y atribución publicitaria en streaming.
+Not legal advice. This is what I've had to solve building interfaces in audited
+products — SOC 2, ISO 27001, GDPR and HIPAA in security compliance; COPPA and ad
+attribution in streaming.
 
-La tesis: casi todo el compliance que rompe en producción **rompe en el cliente**.
-El equipo legal escribe la política, backend cifra la base de datos, y luego una
-etiqueta de terceros dispara antes del banner de consentimiento y el trabajo de
-seis meses se cae.
+The thesis: most compliance that breaks in production **breaks on the client**.
+Legal writes the policy, backend encrypts the database, and then a third-party
+tag fires before the consent banner and six months of work falls over.
 
-## Contenido
+## Contents
 
 | | |
 |---|---|
-| [Consentimiento](docs/01-consent-gating.md) | Por qué el banner no es el control, y dónde va el control de verdad |
-| [Analítica sin PII](docs/02-analytics-pii.md) | GA4, GTM y CAPI sin filtrar datos personales |
-| [Privacidad infantil](docs/03-kids-privacy.md) | COPPA y GDPR art. 8 cuando tu producto tiene contenido para menores |
-| [Evidencia SOC 2](docs/04-soc2-frontend.md) | Qué te va a pedir el auditor que vive en el front-end |
+| [Consent](docs/01-consent-gating.md) | Why the banner isn't the control, and where the control actually lives |
+| [Analytics without PII](docs/02-analytics-pii.md) | GA4, GTM and CAPI without leaking personal data |
+| [Children's privacy](docs/03-kids-privacy.md) | COPPA and GDPR art. 8 when your product carries kids content |
+| [SOC 2 evidence](docs/04-soc2-frontend.md) | What the auditor will ask for that lives in the front-end |
 
-## Ejemplos
+## Examples
 
-Código ejecutable, no pseudocódigo:
+Runnable code, not pseudocode:
 
-- [`src/consent.ts`](src/consent.ts) — máquina de estados de consentimiento
-- [`src/hash.ts`](src/hash.ts) — normalización y hash SHA-256 para CAPI
-- [`tests/`](tests/) — specs que **fallan** si algo dispara antes del consentimiento
+- [`src/consent.ts`](src/consent.ts) — consent state machine
+- [`src/loader.ts`](src/loader.ts) — the single gate for third-party tags
+- [`src/hash.ts`](src/hash.ts) — normalization and SHA-256 for conversion APIs
+- [`tests/`](tests/) — specs that **fail** if anything fires before consent
 
 ```bash
 npm install
 npm test
 ```
 
-## Por qué existe
+## Why this exists
 
-Porque la mayoría del material sobre esto está escrito para abogados o para
-gente de infra, y el que lo implementa acaba siendo quien escribe el componente.
+Because most writing on this is aimed at lawyers or at infra people, and the
+person implementing it is whoever writes the component.
