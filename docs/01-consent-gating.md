@@ -1,63 +1,63 @@
-# El banner no es el control
+# The banner is not the control
 
-El error más común que he visto auditar: tratar el banner de consentimiento como
-si fuera el mecanismo de cumplimiento. No lo es. El banner es **interfaz**. El
-mecanismo es lo que impide que se cargue nada hasta que hay una decisión.
+The most common thing I've seen fail an audit: treating the consent banner as if
+it were the compliance mechanism. It isn't. The banner is **interface**. The
+mechanism is whatever prevents anything from loading until there's a decision.
 
-Si tu banner es bonito y accesible pero el snippet de GTM está en el `<head>`
-sin condición, no cumples nada. Solo lo has documentado en pantalla.
+If your banner is beautiful and accessible but the GTM snippet sits in `<head>`
+unconditionally, you comply with nothing. You've just documented it on screen.
 
-## Qué exige realmente el consentimiento previo
+## What prior consent actually requires
 
-Bajo GDPR (y ePrivacy, que es la que manda en cookies), el consentimiento tiene
-que ser **previo, específico, informado e inequívoco**, y tan fácil de retirar
-como de dar. En la práctica, para el front-end:
+Under GDPR — and ePrivacy, which is the one that governs cookies — consent must
+be **prior, specific, informed and unambiguous**, and as easy to withdraw as to
+give. In front-end terms:
 
-- Nada no esencial se carga antes del `accept`. Ni el script, ni la cookie, ni
-  la petición de red.
-- "Seguir navegando implica aceptación" no vale. Scroll no es consentimiento.
-- Rechazar tiene que costar lo mismo que aceptar. Un botón, mismo nivel.
-- Sin preselección. Las casillas de categorías no esenciales arrancan en `false`.
-- Retirar es una acción disponible siempre, no enterrada en un PDF.
+- Nothing non-essential loads before `accept`. Not the script, not the cookie,
+  not the network request.
+- "Continued browsing implies acceptance" doesn't hold. Scrolling isn't consent.
+- Rejecting must cost what accepting costs. One button, same level.
+- No pre-ticked boxes. Non-essential categories start at `false`.
+- Withdrawal is always available, not buried in a PDF.
 
-## Dónde va el control
+## Where the control goes
 
-Una sola puerta, y todo pasa por ella:
+One gate, and everything passes through it:
 
 ```
-decisión del usuario
-        ↓
-  estado de consentimiento  ←── persistido, versionado
-        ↓
-   cargador de etiquetas    ←── el único sitio que inyecta scripts
-        ↓
-   terceros (GA4, Meta, …)
+user decision
+      ↓
+ consent state      ←── persisted, versioned
+      ↓
+  tag loader        ←── the only place that injects scripts
+      ↓
+ third parties (GA4, Meta, …)
 ```
 
-Ningún componente carga su propio script. Ninguno. En cuanto un equipo mete un
-`<script>` de un proveedor directamente en su vista "porque era rápido", la
-puerta deja de existir y nadie se entera hasta la auditoría.
+No component loads its own script. None. The moment a team drops a vendor
+`<script>` straight into their view "because it was quicker", the gate stops
+existing and nobody finds out until the audit.
 
-## Los tres estados, no dos
+## Three states, not two
 
-El fallo de diseño que más he tenido que deshacer es modelar el consentimiento
-como booleano. Son tres:
+The design mistake I've had to undo most often is modelling consent as a
+boolean. There are three states:
 
-| Estado | Significa | Qué se carga |
+| State | Means | What loads |
 |---|---|---|
-| `unknown` | Aún no ha decidido | Nada no esencial |
-| `granted` | Aceptó esta categoría | Lo de esa categoría |
-| `denied` | Rechazó explícitamente | Nada, y no se le vuelve a preguntar en cada vista |
+| `unknown` | Hasn't decided yet | Nothing non-essential |
+| `granted` | Accepted this category | That category's tags |
+| `denied` | Explicitly refused | Nothing, and don't re-prompt on every view |
 
-Con un booleano, `false` significa a la vez "dijo que no" y "todavía no ha
-dicho nada", y acabas o disparando antes de tiempo o preguntando en bucle.
+With a boolean, `false` means both "said no" and "hasn't said anything yet", so
+you either fire early or re-prompt forever.
 
-## Versionar la decisión
+## Version the decision
 
-El consentimiento se da sobre una política concreta. Si cambias las categorías o
-metes un proveedor nuevo, el consentimiento anterior no cubre lo nuevo.
+Consent is given against a specific policy. Change the categories or add a
+vendor, and the earlier consent doesn't cover the new thing.
 
-Guarda siempre la versión junto a la decisión:
+Always store the version alongside the decision:
 
 ```json
 {
@@ -67,22 +67,22 @@ Guarda siempre la versión junto a la decisión:
 }
 ```
 
-Cuando `CURRENT_VERSION > stored.version`, el estado vuelve a `unknown`. Es
-literalmente la evidencia que te va a pedir el auditor: *demuéstrame que este
-usuario consintió esta versión de la política, y cuándo.*
+When `CURRENT_VERSION > stored.version`, the state returns to `unknown`. This is
+literally the evidence an auditor will ask for: *show me that this user
+consented to this version of the policy, and when.*
 
-## Consent Mode de Google
+## Google Consent Mode
 
-Si usas GA4 o Google Ads, Consent Mode v2 espera cuatro señales:
+If you use GA4 or Google Ads, Consent Mode v2 expects four signals:
 
 - `ad_storage`
 - `analytics_storage`
 - `ad_user_data`
 - `ad_personalization`
 
-El detalle que se escapa: hay que mandar el estado **por defecto en `denied`
-antes** de que cargue gtag, y luego el `update` cuando el usuario decide. Si solo
-mandas el `update`, hay una ventana en la que se ha disparado en modo concedido.
+The detail people miss: you have to send the default state as `denied`
+**before** gtag loads, then send the `update` once the user decides. Send only
+the update and there's a window where it fired in granted mode.
 
 ```js
 gtag('consent', 'default', {
@@ -93,27 +93,27 @@ gtag('consent', 'default', {
 });
 ```
 
-## Cómo se prueba
+## How you prove it
 
-Un test que abre la página sin interactuar y falla si sale **cualquier**
-petición a un dominio de terceros. Ver [`tests/consent.spec.ts`](../tests/consent.spec.ts).
+A test that opens the page without interacting and fails if **any** request goes
+out to a third-party domain. See [`tests/consent.spec.ts`](../tests/consent.spec.ts).
 
-Esto es lo que convierte "cumplimos" en algo verificable en CI en vez de una
-afirmación en una reunión.
+This is what turns "we comply" into something verifiable in CI instead of a
+claim made in a meeting.
 
-## Notas de la implementación
+## Implementation notes
 
-Sobre [`src/loader.ts`](../src/loader.ts): es deliberadamente la única cosa del
-código base que inyecta scripts de terceros. Si un componente lo hace por su
-cuenta el gating deja de ser verificable, y el test de CI ya no demuestra nada.
-Esa restricción es el control; el código solo la expresa.
+On [`src/loader.ts`](../src/loader.ts): it is deliberately the only thing in the
+codebase that injects third-party scripts. If a component does it directly the
+gating stops being verifiable, and the CI test no longer proves anything. That
+restriction is the control; the code only expresses it.
 
-`reloadOnWithdrawal` existe porque retirar el consentimiento no descarga un
-script ya ejecutado. Quitar la etiqueta del DOM no deshace lo que corrió. Si tu
-política promete que dejas de rastrear al instante, hace falta recargar.
+`reloadOnWithdrawal` exists because withdrawing consent doesn't unload a script
+that already ran. Removing the tag from the DOM doesn't undo what executed. If
+your policy promises tracking stops immediately, you need the reload.
 
-Sobre [`src/consent.ts`](../src/consent.ts): los bloques `catch` vacíos alrededor
-del almacenamiento son a propósito. En modo privado o con el almacenamiento
-lleno, `setItem` lanza. El estado se queda en memoria esa sesión y se vuelve a
-preguntar en la siguiente — que es el comportamiento correcto. Lo que nunca hay
-que hacer es tratar el fallo de escritura como consentimiento concedido.
+On [`src/consent.ts`](../src/consent.ts): the empty `catch` blocks around storage
+are intentional. In private mode, or with storage full, `setItem` throws. The
+state then lives in memory for the session and the user is asked again next time
+— which is the correct behaviour. What you must never do is treat a failed write
+as consent granted.
