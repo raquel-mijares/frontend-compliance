@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const BASE = process.env.BASE_URL ?? 'http://localhost:3000';
+const BASE = process.env.BASE_URL ?? 'http://localhost:4173';
 const EMAIL = /[\w.+-]+@[\w-]+\.[\w.]{2,}/;
 const PHONE = /(?:\+?\d[\s.-]?){9,}/;
 

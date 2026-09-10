@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { isTracker } from './third-party-hosts';
 
-const BASE = process.env.BASE_URL ?? 'http://localhost:3000';
+const BASE = process.env.BASE_URL ?? 'http://localhost:4173';
 test.describe('consent gating', () => {
   test('contacts no tracker before a decision', async ({ page }) => {
     const hits: string[] = [];
