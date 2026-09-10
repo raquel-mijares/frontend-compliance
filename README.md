@@ -29,11 +29,24 @@ Runnable code, not pseudocode:
 - [`src/loader.ts`](src/loader.ts) — the single gate for third-party tags
 - [`src/hash.ts`](src/hash.ts) — normalization and SHA-256 for conversion APIs
 - [`tests/`](tests/) — specs that **fail** if anything fires before consent
+- [`demo/`](demo/) — a small page wiring the two together, so the specs have
+  something real to run against
 
 ```bash
 npm install
-npm test
+npm test                       # 9 unit tests
+npx playwright install chromium
+npm run test:e2e               # 7 specs against the demo
 ```
+
+The e2e run starts the demo itself. `npm run demo` serves it at
+<http://localhost:4173> if you want to click through it by hand.
+
+What the specs actually assert: no tracker request and no non-essential cookie
+before a decision, nothing after rejecting, analytics **does** load after
+accepting — a gate that blocks everything passes the first test and breaks the
+product — reject costing the same as accept, and no PII leaving in URLs or
+request bodies during signup.
 
 ## Why this exists
 
