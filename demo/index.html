@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>frontend-compliance demo</title>
+    <style>
+      :root { color-scheme: light dark; }
+      body {
+        font: 15px/1.6 system-ui, -apple-system, sans-serif;
+        max-width: 34rem; margin: 0 auto; padding: 2rem 1rem 8rem;
+      }
+      h1 { font-size: 1.3rem; }
+      label { display: block; margin: .75rem 0 .25rem; font-weight: 600; }
+      input { width: 100%; padding: .5rem; font: inherit; box-sizing: border-box; }
+      button { padding: .5rem 1rem; font: inherit; cursor: pointer; }
+      #banner {
+        position: fixed; inset: auto 0 0 0; padding: 1rem;
+        background: Canvas; border-top: 1px solid GrayText;
+        display: flex; gap: .5rem; align-items: center; flex-wrap: wrap;
+      }
+      #banner p { margin: 0 auto 0 0; }
+      #state { font-family: ui-monospace, monospace; font-size: .85rem; }
+    </style>
+  </head>
+  <body>
+    <h1>frontend-compliance demo</h1>
+    <p>
+      A deliberately small page that wires
+      <code>ConsentState</code> to <code>TagLoader</code> so the Playwright
+      specs have something real to run against.
+    </p>
+
+    <p id="state">consent: unknown</p>
+
+    <form id="signup">
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" autocomplete="email" />
+
+      <label for="phone">Phone</label>
+      <input id="phone" name="phone" type="tel" autocomplete="tel" />
+
+      <p><button type="submit">Sign up</button></p>
+    </form>
+
+    <div id="banner" hidden>
+      <p>We use cookies for analytics and advertising.</p>
+      <button id="reject" type="button">Reject</button>
+      <button id="accept" type="button">Accept</button>
+    </div>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
