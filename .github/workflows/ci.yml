@@ -18,6 +18,20 @@ jobs:
       - run: npm run typecheck
       - run: npm test
 
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      # This is the job that keeps the consent claim true. If someone adds a
+      # vendor script outside the TagLoader, it goes red here.
+      - run: npm run test:e2e
+
   audit:
     runs-on: ubuntu-latest
     steps:
