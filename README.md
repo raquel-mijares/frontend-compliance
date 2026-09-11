@@ -27,6 +27,7 @@ Runnable code, not pseudocode:
 
 - [`src/consent.ts`](src/consent.ts) — consent state machine
 - [`src/loader.ts`](src/loader.ts) — the single gate for third-party tags
+- [`src/contexts.ts`](src/contexts.ts) — separate tag inventories for general and kids audiences
 - [`src/hash.ts`](src/hash.ts) — normalization and SHA-256 for conversion APIs
 - [`tests/`](tests/) — specs that **fail** if anything fires before consent
 - [`demo/`](demo/) — a small page wiring the two together, so the specs have

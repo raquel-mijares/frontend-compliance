@@ -76,3 +76,19 @@ past it. What makes the technical difference:
 
 That last one is what keeps the rest true a year from now. The list without the
 test is a document; with the test it's a control.
+
+## Implementation notes
+
+[`src/contexts.ts`](../src/contexts.ts) implements the two-context pattern above.
+`TagRegistry.register` requires an explicit list of contexts, so a tag can't end
+up anywhere by default. The kids context only contains what was listed for it,
+and an `advertising` tag registered for `kids` throws at startup instead of
+shipping.
+
+The loader doesn't change: it receives `registry.for(context)` and gates on
+consent as usual. Consent and audience are separate questions. A child's parent
+clicking "accept" does not turn behavioural advertising back on.
+
+The demo runs in the kids context with `?audience=kids`.
+[`tests/kids.spec.ts`](../tests/kids.spec.ts) accepts consent there and fails if
+any tracker is contacted — the last item on the checklist above.
