@@ -1,21 +1,30 @@
 import { ConsentState } from '../src/consent';
-import { TagLoader, type Tag } from '../src/loader';
+import { TagLoader } from '../src/loader';
+import { TagRegistry, type AudienceContext } from '../src/contexts';
 
-const TAGS: Tag[] = [
+const registry = new TagRegistry();
+registry.register(
   {
     id: 'ga4',
     category: 'analytics',
     src: 'https://www.googletagmanager.com/gtag/js?id=G-DEMO',
   },
+  ['general'],
+);
+registry.register(
   {
     id: 'meta',
     category: 'advertising',
     src: 'https://connect.facebook.net/en_US/fbevents.js',
   },
-];
+  ['general'],
+);
+
+const audience: AudienceContext =
+  new URLSearchParams(location.search).get('audience') === 'kids' ? 'kids' : 'general';
 
 const consent = new ConsentState();
-const loader = new TagLoader(consent, TAGS);
+const loader = new TagLoader(consent, registry.for(audience));
 
 const banner = document.getElementById('banner') as HTMLElement;
 const state = document.getElementById('state') as HTMLElement;
