@@ -21,6 +21,7 @@ tag fires before the consent banner and six months of work falls over.
 | [Children's privacy](docs/03-kids-privacy.md) | COPPA and GDPR art. 8 when your product carries kids content |
 | [SOC 2 evidence](docs/04-soc2-frontend.md) | What the auditor will ask for that lives in the front-end |
 | [Event deduplication](docs/05-event-deduplication.md) | Counting a conversion once across Pixel and CAPI |
+| [Consent UI accessibility](docs/06-consent-ui-accessibility.md) | Where consent law and accessibility law are the same bug |
 
 ## Examples
 
