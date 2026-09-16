@@ -19,7 +19,10 @@
         background: Canvas; border-top: 1px solid GrayText;
         display: flex; gap: .5rem; align-items: center; flex-wrap: wrap;
       }
+      #banner[hidden] { display: none; }
+      #banner h2 { font-size: 1rem; margin: 0; width: 100%; }
       #banner p { margin: 0 auto 0 0; }
+      #banner :focus-visible, button:focus-visible { outline: 2px solid Highlight; outline-offset: 2px; }
       #state { font-family: ui-monospace, monospace; font-size: .85rem; }
     </style>
   </head>
@@ -43,8 +46,18 @@
       <p><button type="submit">Sign up</button></p>
     </form>
 
-    <div id="banner" hidden>
-      <p>We use cookies for analytics and advertising.</p>
+    <p><button id="settings" type="button">Cookie settings</button></p>
+
+    <div
+      id="banner"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="banner-title"
+      aria-describedby="banner-desc"
+      hidden
+    >
+      <h2 id="banner-title">Cookies</h2>
+      <p id="banner-desc">We use cookies for analytics and advertising.</p>
       <button id="reject" type="button">Reject</button>
       <button id="accept" type="button">Accept</button>
     </div>
