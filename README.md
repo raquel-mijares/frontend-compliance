@@ -20,6 +20,7 @@ tag fires before the consent banner and six months of work falls over.
 | [Analytics without PII](docs/02-analytics-pii.md) | GA4, GTM and CAPI without leaking personal data |
 | [Children's privacy](docs/03-kids-privacy.md) | COPPA and GDPR art. 8 when your product carries kids content |
 | [SOC 2 evidence](docs/04-soc2-frontend.md) | What the auditor will ask for that lives in the front-end |
+| [Event deduplication](docs/05-event-deduplication.md) | Counting a conversion once across Pixel and CAPI |
 
 ## Examples
 
@@ -29,6 +30,7 @@ Runnable code, not pseudocode:
 - [`src/loader.ts`](src/loader.ts) — the single gate for third-party tags
 - [`src/contexts.ts`](src/contexts.ts) — separate tag inventories for general and kids audiences
 - [`src/hash.ts`](src/hash.ts) — normalization and SHA-256 for conversion APIs
+- [`src/events.ts`](src/events.ts) — shared `event_id` for Pixel/CAPI deduplication
 - [`tests/`](tests/) — specs that **fail** if anything fires before consent
 - [`demo/`](demo/) — a small page wiring the two together, so the specs have
   something real to run against
