@@ -70,6 +70,11 @@ name, that focus lands on reject, that Tab cycles without escaping, that Enter
 alone refuses, that Escape leaves the state `unknown` and fires no tracker, and
 that focus returns where it came from.
 
+[`tests/axe.spec.ts`](../tests/axe.spec.ts) adds an axe scan against WCAG 2.2 AA
+plus axe's best-practice rules, with the dialog open and after a decision. Its
+first run found that the demo had no `<main>` landmark, so screen reader users
+had no way to jump past the dialog to the content.
+
 Automated checks catch maybe half of what matters here. They will not tell you
 whether the wording is comprehensible or the choice feels balanced. Use them for
 the regressions — the focus trap someone breaks next quarter — and a real
