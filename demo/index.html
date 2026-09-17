@@ -27,26 +27,28 @@
     </style>
   </head>
   <body>
-    <h1>frontend-compliance demo</h1>
-    <p>
-      A deliberately small page that wires
-      <code>ConsentState</code> to <code>TagLoader</code> so the Playwright
-      specs have something real to run against.
-    </p>
+    <main>
+      <h1>frontend-compliance demo</h1>
+      <p>
+        A deliberately small page that wires
+        <code>ConsentState</code> to <code>TagLoader</code> so the Playwright
+        specs have something real to run against.
+      </p>
 
-    <p id="state">consent: unknown</p>
+      <p id="state">consent: unknown</p>
 
-    <form id="signup">
-      <label for="email">Email</label>
-      <input id="email" name="email" type="email" autocomplete="email" />
+      <form id="signup">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" autocomplete="email" />
 
-      <label for="phone">Phone</label>
-      <input id="phone" name="phone" type="tel" autocomplete="tel" />
+        <label for="phone">Phone</label>
+        <input id="phone" name="phone" type="tel" autocomplete="tel" />
 
-      <p><button type="submit">Sign up</button></p>
-    </form>
+        <p><button type="submit">Sign up</button></p>
+      </form>
 
-    <p><button id="settings" type="button">Cookie settings</button></p>
+      <p><button id="settings" type="button">Cookie settings</button></p>
+    </main>
 
     <div
       id="banner"
