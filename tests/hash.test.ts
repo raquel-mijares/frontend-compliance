@@ -24,6 +24,13 @@ describe('hashing user data', () => {
     expect(normalizePhone('---')).toBe('');
   });
 
+  it('drops the trunk zero and international prefix for other countries', () => {
+    expect(normalizePhone('020 7946 0958', '44')).toBe('442079460958');
+    expect(normalizePhone('+44 20 7946 0958', '44')).toBe('442079460958');
+    expect(normalizePhone('0044 20 7946 0958', '44')).toBe('442079460958');
+    expect(normalizePhone('000', '44')).toBe('');
+  });
+
   it('lowercases names and strips accents', () => {
     expect(normalizeName('  José ')).toBe('jose');
     expect(normalizeName('ZOË')).toBe('zoe');
@@ -48,5 +55,11 @@ describe('hashing user data', () => {
   it('leaves out fields that were not provided', async () => {
     expect(Object.keys(await hashUserData({ email: 'ana@example.com' }))).toEqual(['em']);
     expect(await hashUserData({})).toEqual({});
+  });
+
+  it('does not send a hash for fields that are blank after normalizing', async () => {
+    expect(
+      await hashUserData({ email: '   ', phone: '()', firstName: ' ', lastName: 'Pérez' }),
+    ).toEqual({ ln: await sha256('perez') });
   });
 });
