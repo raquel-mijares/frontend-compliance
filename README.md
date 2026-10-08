@@ -38,9 +38,9 @@ Runnable code, not pseudocode:
 
 ```bash
 npm install
-npm test                       # 9 unit tests
+npm test                       # 21 unit tests
 npx playwright install chromium
-npm run test:e2e               # 7 specs against the demo
+npm run test:e2e               # 18 specs against the demo
 ```
 
 The e2e run starts the demo itself. `npm run demo` serves it at
@@ -51,6 +51,12 @@ before a decision, nothing after rejecting, analytics **does** load after
 accepting — a gate that blocks everything passes the first test and breaks the
 product — reject costing the same as accept, and no PII leaving in URLs or
 request bodies during signup.
+
+They also cover the kids context, where accepting consent still loads no
+third-party tag while the same consent does load them for a general audience,
+and the dialog itself: announced as a modal, focus trapped and returned,
+rejectable with the keyboard alone, Escape not counted as consent, and an axe
+scan with the dialog open and after rejecting.
 
 ## Why this exists
 
