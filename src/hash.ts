@@ -4,9 +4,10 @@ export function normalizeEmail(input: string): string {
 }
 
 export function normalizePhone(input: string, countryCode = '1'): string {
-  const digits = input.replace(/\D/g, '');
-  if (!digits) return '';
-  return digits.startsWith(countryCode) ? digits : `${countryCode}${digits}`;
+  const digits = input.replace(/\D/g, '').replace(/^00/, '');
+  if (digits.startsWith(countryCode)) return digits;
+  const national = digits.replace(/^0+/, '');
+  return national ? `${countryCode}${national}` : '';
 }
 
 export function normalizeName(input: string): string {
@@ -36,9 +37,12 @@ export async function hashUserData(
   user: UserData,
 ): Promise<Record<string, string>> {
   const out: Record<string, string> = {};
-  if (user.email) out.em = await sha256(normalizeEmail(user.email));
-  if (user.phone) out.ph = await sha256(normalizePhone(user.phone));
-  if (user.firstName) out.fn = await sha256(normalizeName(user.firstName));
-  if (user.lastName) out.ln = await sha256(normalizeName(user.lastName));
+  const add = async (key: string, value: string) => {
+    if (value) out[key] = await sha256(value);
+  };
+  await add('em', normalizeEmail(user.email ?? ''));
+  await add('ph', normalizePhone(user.phone ?? ''));
+  await add('fn', normalizeName(user.firstName ?? ''));
+  await add('ln', normalizeName(user.lastName ?? ''));
   return out;
 }
