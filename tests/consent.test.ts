@@ -1,15 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ConsentState, POLICY_VERSION } from '../src/consent';
-
-class MemoryStorage implements Storage {
-  private map = new Map<string, string>();
-  get length() { return this.map.size; }
-  clear() { this.map.clear(); }
-  getItem(k: string) { return this.map.get(k) ?? null; }
-  key(i: number) { return [...this.map.keys()][i] ?? null; }
-  removeItem(k: string) { this.map.delete(k); }
-  setItem(k: string, v: string) { this.map.set(k, v); }
-}
+import { MemoryStorage } from './memory-storage';
 
 describe('ConsentState', () => {
   let storage: MemoryStorage;
@@ -75,14 +66,15 @@ describe('ConsentState', () => {
     expect(c.get('analytics')).toBe('unknown');
   });
 
-  it('maps to the four Consent Mode v2 signals', () => {
+  it.each([
+    ['null', 'null'],
+    ['a record without categories', JSON.stringify({ version: POLICY_VERSION, timestamp: 'now' })],
+    ['categories that are not booleans', JSON.stringify({ version: POLICY_VERSION, timestamp: 'now', categories: { analytics: 'yes', advertising: true } })],
+    ['a missing timestamp', JSON.stringify({ version: POLICY_VERSION, categories: { analytics: true, advertising: true } })],
+  ])('ignores a stored value with %s', (_label, raw) => {
+    storage.setItem('consent', raw);
     const c = new ConsentState(storage);
-    c.set({ analytics: true, advertising: false });
-    expect(c.toGoogleConsentMode()).toEqual({
-      analytics_storage: 'granted',
-      ad_storage: 'denied',
-      ad_user_data: 'denied',
-      ad_personalization: 'denied',
-    });
+    expect(c.get('analytics')).toBe('unknown');
+    expect(c.resolved).toBe(false);
   });
 });

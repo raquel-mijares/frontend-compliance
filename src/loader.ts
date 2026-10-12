@@ -1,21 +1,22 @@
-import { ConsentState, type Category } from './consent';
+import type { ConsentState, OptionalCategory } from './consent';
 
 export interface Tag {
   id: string;
-  category: Exclude<Category, 'necessary'>;
+  category: OptionalCategory;
   src: string;
   attrs?: Record<string, string>;
 }
 
 export class TagLoader {
   private loaded = new Set<string>();
+  private unsubscribe: () => void;
 
   constructor(
     private consent: ConsentState,
     private tags: Tag[],
     private doc: Document = document,
   ) {
-    this.consent.subscribe(() => this.sync());
+    this.unsubscribe = this.consent.subscribe(() => this.sync());
   }
 
   start(): void {
@@ -40,6 +41,10 @@ export class TagLoader {
     }
     this.doc.head.appendChild(el);
     this.loaded.add(tag.id);
+  }
+
+  dispose(): void {
+    this.unsubscribe();
   }
 
   reloadOnWithdrawal(): void {

@@ -84,6 +84,11 @@ The detail people miss: you have to send the default state as `denied`
 **before** gtag loads, then send the `update` once the user decides. Send only
 the update and there's a window where it fired in granted mode.
 
+In this repo the mapping lives in [`src/adapters/google.ts`](../src/adapters/google.ts):
+`toGoogleConsentMode(consent)` builds the `update` payload, and the consent state
+itself never imports a vendor. Adding Meta or TikTok is a new adapter, not an edit
+to `ConsentState`.
+
 ```js
 gtag('consent', 'default', {
   ad_storage: 'denied',
