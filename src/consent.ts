@@ -1,16 +1,32 @@
 export type Category = 'necessary' | 'analytics' | 'advertising';
 
+export type OptionalCategory = Exclude<Category, 'necessary'>;
+
 export type Decision = 'unknown' | 'granted' | 'denied';
 
 export interface ConsentRecord {
   version: number;
   timestamp: string;
-  categories: Record<Exclude<Category, 'necessary'>, boolean>;
+  categories: Record<OptionalCategory, boolean>;
 }
 
 export const POLICY_VERSION = 1;
 
 const STORAGE_KEY = 'consent';
+
+export function isConsentRecord(value: unknown): value is ConsentRecord {
+  if (typeof value !== 'object' || value === null) return false;
+  const record = value as Record<string, unknown>;
+  const categories = record.categories as Record<string, unknown> | null;
+  return (
+    record.version === POLICY_VERSION &&
+    typeof record.timestamp === 'string' &&
+    typeof categories === 'object' &&
+    categories !== null &&
+    typeof categories.analytics === 'boolean' &&
+    typeof categories.advertising === 'boolean'
+  );
+}
 
 export class ConsentState {
   private record: ConsentRecord | null = null;
@@ -24,9 +40,8 @@ export class ConsentState {
     try {
       const raw = this.storage.getItem(STORAGE_KEY);
       if (!raw) return null;
-      const parsed = JSON.parse(raw) as ConsentRecord;
-      if (parsed.version !== POLICY_VERSION) return null;
-      return parsed;
+      const parsed: unknown = JSON.parse(raw);
+      return isConsentRecord(parsed) ? parsed : null;
     } catch {
       return null;
     }
@@ -83,16 +98,5 @@ export class ConsentState {
 
   private emit(): void {
     for (const fn of this.listeners) fn(this);
-  }
-
-  toGoogleConsentMode(): Record<string, 'granted' | 'denied'> {
-    const analytics = this.allows('analytics') ? 'granted' : 'denied';
-    const ads = this.allows('advertising') ? 'granted' : 'denied';
-    return {
-      analytics_storage: analytics,
-      ad_storage: ads,
-      ad_user_data: ads,
-      ad_personalization: ads,
-    };
   }
 }

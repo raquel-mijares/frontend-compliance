@@ -8,6 +8,11 @@ export type EventName =
   | 'Subscribe'
   | 'Purchase';
 
+export interface ClickIds {
+  fbp?: string;
+  fbc?: string;
+}
+
 export interface BrowserEvent {
   eventName: EventName;
   eventId: string;
@@ -44,8 +49,8 @@ export function browserEvent(
   };
 }
 
-export function readClickIds(cookie: string): { fbp?: string; fbc?: string } {
-  const out: { fbp?: string; fbc?: string } = {};
+export function readClickIds(cookie: string): ClickIds {
+  const out: ClickIds = {};
   for (const part of cookie.split(';')) {
     const [rawName, ...rest] = part.split('=');
     const name = rawName?.trim();
@@ -60,7 +65,7 @@ export function readClickIds(cookie: string): { fbp?: string; fbc?: string } {
 export async function toServerEvent(
   event: BrowserEvent,
   user: UserData,
-  clickIds: { fbp?: string; fbc?: string } = {},
+  clickIds: ClickIds = {},
 ): Promise<ServerEvent> {
   const user_data = await hashUserData(user);
   if (clickIds.fbp) user_data.fbp = clickIds.fbp;
