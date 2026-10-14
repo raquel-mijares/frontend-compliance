@@ -32,13 +32,16 @@ Runnable code, not pseudocode:
 - [`src/contexts.ts`](src/contexts.ts) — separate tag inventories for general and kids audiences
 - [`src/hash.ts`](src/hash.ts) — normalization and SHA-256 for conversion APIs
 - [`src/events.ts`](src/events.ts) — shared `event_id` for Pixel/CAPI deduplication
+- [`src/adapters/`](src/adapters/) — translate one consent state into each vendor's
+  signal: Google Consent Mode (`granted`/`denied` per storage type) and the Meta
+  Pixel (`grant`/`revoke`)
 - [`tests/`](tests/) — specs that **fail** if anything fires before consent
 - [`demo/`](demo/) — a small page wiring the two together, so the specs have
   something real to run against
 
 ```bash
 npm install
-npm test                       # 38 unit tests
+npm test                       # 41 unit tests
 npx playwright install chromium
 npm run test:e2e               # 18 specs against the demo
 ```
