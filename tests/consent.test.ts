@@ -60,6 +60,17 @@ describe('ConsentState', () => {
     expect(c.allows('analytics')).toBe(false);
   });
 
+  it('notifies subscribers on each change and stops after unsubscribe', () => {
+    const c = new ConsentState(storage);
+    const seen: boolean[] = [];
+    const unsubscribe = c.subscribe((s) => seen.push(s.allows('analytics')));
+    c.acceptAll();
+    c.withdraw();
+    unsubscribe();
+    c.acceptAll();
+    expect(seen).toEqual([true, false]);
+  });
+
   it('does not blow up on corrupt storage', () => {
     storage.setItem('consent', '{no es json');
     const c = new ConsentState(storage);
