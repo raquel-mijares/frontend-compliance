@@ -36,8 +36,10 @@ Runnable code, not pseudocode:
   signal: Google Consent Mode (`granted`/`denied` per storage type) and the Meta
   Pixel (`grant`/`revoke`)
 - [`tests/`](tests/) — specs that **fail** if anything fires before consent
-- [`demo/`](demo/) — a small page wiring the two together, so the specs have
-  something real to run against
+- [`demo/`](demo/) — a React page wiring the two together, so the specs have
+  something real to run against. The library stays framework-agnostic; the demo
+  reads `ConsentState` through `useSyncExternalStore` and renders the banner
+  with Radix Dialog. Responsive from phone to ultrawide, light and dark
 
 ```bash
 npm install
