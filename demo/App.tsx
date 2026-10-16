@@ -101,7 +101,7 @@ export function App() {
           ) : (
             <ul className="rows">
               {tags.map((tag) => {
-                const loaded = consent.allows(tag.category);
+                const loaded = state[tag.category] === 'granted';
                 return (
                   <li className="row" key={tag.id}>
                     <span className="tag">
