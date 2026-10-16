@@ -37,6 +37,7 @@ test.describe('consent dialog accessibility', () => {
     });
 
     await page.goto('/');
+    await expect(page.getByRole('button', { name: /reject/i })).toBeFocused();
     await page.keyboard.press('Enter');
 
     await expect(page.getByRole('dialog')).toBeHidden();
@@ -51,6 +52,7 @@ test.describe('consent dialog accessibility', () => {
     });
 
     await page.goto('/');
+    await expect(page.getByRole('button', { name: /reject/i })).toBeFocused();
     await page.keyboard.press('Escape');
 
     await expect(page.getByRole('dialog')).toBeHidden();
@@ -60,6 +62,7 @@ test.describe('consent dialog accessibility', () => {
 
   test('returns focus to the settings button after a decision', async ({ page }) => {
     await page.goto('/');
+    await expect(page.getByRole('button', { name: /reject/i })).toBeFocused();
     await page.keyboard.press('Escape');
     await expect(page.getByRole('button', { name: /cookie settings/i })).toBeFocused();
   });
