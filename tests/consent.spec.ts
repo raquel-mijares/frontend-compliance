@@ -51,6 +51,27 @@ test.describe('consent gating', () => {
     expect(hits.length).toBeGreaterThan(0);
   });
 
+  test('withdrawing after accepting stops the trackers', async ({ page }) => {
+    await page.goto(BASE);
+    await page.getByRole('button', { name: /accept/i }).click();
+    await expect(page.locator('script[data-tag-id]')).not.toHaveCount(0);
+
+    const hits: string[] = [];
+    page.on('request', (req) => {
+      if (isTracker(req.url())) hits.push(req.url());
+    });
+
+    await Promise.all([
+      page.waitForEvent('load'),
+      page.getByRole('button', { name: /cookie settings/i }).click(),
+    ]);
+    await page.getByRole('button', { name: /reject/i }).click();
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.locator('script[data-tag-id]')).toHaveCount(0);
+    expect(hits, `third-party requests after withdrawing:\n${hits.join('\n')}`).toEqual([]);
+  });
+
   test('rejecting costs the same as accepting', async ({ page }) => {
     await page.goto(BASE);
     const accept = page.getByRole('button', { name: /accept/i });

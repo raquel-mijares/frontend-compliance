@@ -78,6 +78,7 @@ banner.addEventListener('keydown', (e) => {
 
 settings.addEventListener('click', () => {
   consent.withdraw();
+  loader.reloadOnWithdrawal();
   open();
 });
 
