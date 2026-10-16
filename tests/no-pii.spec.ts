@@ -33,6 +33,7 @@ test('sends no PII to third parties in the signup flow', async ({ page }) => {
 
 test('the URL carries no identifiers', async ({ page }) => {
   await page.goto(BASE);
+  await page.keyboard.press('Escape');
   await page.getByLabel(/email/i).fill('ana@example.com');
   await page.getByRole('button', { name: /sign ?up/i }).click();
   await page.waitForURL(/.*/);

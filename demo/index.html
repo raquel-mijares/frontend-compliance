@@ -3,67 +3,15 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="A demo of consent-gated tag loading: no tracker runs before a decision, rejecting costs the same as accepting, and no personal data leaves for third parties." />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#09090b" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2318181b'/%3E%3Cpath d='M9 16.5l4.5 4.5L23 11.5' fill='none' stroke='%23fafafa' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
     <title>frontend-compliance demo</title>
-    <style>
-      :root { color-scheme: light dark; }
-      body {
-        font: 15px/1.6 system-ui, -apple-system, sans-serif;
-        max-width: 34rem; margin: 0 auto; padding: 2rem 1rem 8rem;
-      }
-      h1 { font-size: 1.3rem; }
-      label { display: block; margin: .75rem 0 .25rem; font-weight: 600; }
-      input { width: 100%; padding: .5rem; font: inherit; box-sizing: border-box; }
-      button { padding: .5rem 1rem; font: inherit; cursor: pointer; }
-      #banner {
-        position: fixed; inset: auto 0 0 0; padding: 1rem;
-        background: Canvas; border-top: 1px solid GrayText;
-        display: flex; gap: .5rem; align-items: center; flex-wrap: wrap;
-      }
-      #banner[hidden] { display: none; }
-      #banner h2 { font-size: 1rem; margin: 0; width: 100%; }
-      #banner p { margin: 0 auto 0 0; }
-      #banner :focus-visible, button:focus-visible { outline: 2px solid Highlight; outline-offset: 2px; }
-      #state { font-family: ui-monospace, monospace; font-size: .85rem; }
-    </style>
   </head>
   <body>
-    <main>
-      <h1>frontend-compliance demo</h1>
-      <p>
-        A deliberately small page that wires
-        <code>ConsentState</code> to <code>TagLoader</code> so the Playwright
-        specs have something real to run against.
-      </p>
-
-      <p id="state">consent: unknown</p>
-
-      <form id="signup">
-        <label for="email">Email</label>
-        <input id="email" name="email" type="email" autocomplete="email" />
-
-        <label for="phone">Phone</label>
-        <input id="phone" name="phone" type="tel" autocomplete="tel" />
-
-        <p><button type="submit">Sign up</button></p>
-      </form>
-
-      <p><button id="settings" type="button">Cookie settings</button></p>
-    </main>
-
-    <div
-      id="banner"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="banner-title"
-      aria-describedby="banner-desc"
-      hidden
-    >
-      <h2 id="banner-title">Cookies</h2>
-      <p id="banner-desc">We use cookies for analytics and advertising.</p>
-      <button id="reject" type="button">Reject</button>
-      <button id="accept" type="button">Accept</button>
-    </div>
-
-    <script type="module" src="./main.ts"></script>
+    <div id="root"></div>
+    <script type="module" src="./main.tsx"></script>
   </body>
 </html>
