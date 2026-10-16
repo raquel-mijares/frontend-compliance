@@ -43,7 +43,7 @@ Runnable code, not pseudocode:
 npm install
 npm test                       # 42 unit tests
 npx playwright install chromium
-npm run test:e2e               # 18 specs against the demo
+npm run test:e2e               # 19 specs against the demo
 ```
 
 The e2e run starts the demo itself. `npm run demo` serves it at
