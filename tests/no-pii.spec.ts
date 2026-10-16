@@ -2,7 +2,21 @@ import { test, expect } from '@playwright/test';
 
 const BASE = process.env.BASE_URL ?? 'http://localhost:4173';
 const EMAIL = /[\w.+-]+@[\w-]+\.[\w.]{2,}/;
-const PHONE = /(?:\+?\d[\s.-]?){9,}/;
+const PHONE = '+1 403 555 0142';
+const PHONE_DIGITS = '4035550142';
+
+function decode(text: string): string {
+  try {
+    return decodeURIComponent(text);
+  } catch {
+    return text;
+  }
+}
+
+function carriesPii(text: string): boolean {
+  const decoded = decode(text);
+  return EMAIL.test(decoded) || decoded.replace(/[\s.()+-]/g, '').includes(PHONE_DIGITS);
+}
 
 test('sends no PII to third parties in the signup flow', async ({ page }) => {
   const leaks: { url: string; where: string }[] = [];
@@ -11,17 +25,17 @@ test('sends no PII to third parties in the signup flow', async ({ page }) => {
     const url = req.url();
     if (new URL(url).hostname === new URL(BASE).hostname) return;
 
-    if (EMAIL.test(url) || PHONE.test(url)) leaks.push({ url, where: 'url' });
+    if (carriesPii(url)) leaks.push({ url, where: 'url' });
 
     const body = req.postData();
-    if (body && EMAIL.test(body)) leaks.push({ url, where: 'body' });
+    if (body && carriesPii(body)) leaks.push({ url, where: 'body' });
   });
 
   await page.goto(BASE);
   await page.getByRole('button', { name: /accept/i }).click();
 
   await page.getByLabel(/email/i).fill('ana@example.com');
-  await page.getByLabel(/phone/i).fill('+1 403 555 0142');
+  await page.getByLabel(/phone/i).fill(PHONE);
   await page.getByRole('button', { name: /sign ?up/i }).click();
   await page.waitForLoadState('networkidle');
 
