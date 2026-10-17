@@ -5,11 +5,13 @@ import { MemoryStorage } from './memory-storage';
 
 function fakeDocument() {
   const injected: string[] = [];
+  const reloads: number[] = [];
   const doc = {
+    location: { reload: () => reloads.push(1) },
     createElement: () => ({ dataset: {} as Record<string, string>, setAttribute() {} }),
     head: { appendChild: (el: { dataset: Record<string, string> }) => injected.push(el.dataset.tagId!) },
   };
-  return { doc: doc as unknown as Document, injected };
+  return { doc: doc as unknown as Document, injected, reloads };
 }
 
 const tags: Tag[] = [
@@ -49,5 +51,28 @@ describe('TagLoader', () => {
     loader.dispose();
     consent.acceptAll();
     expect(injected).toEqual([]);
+  });
+
+  it('reports loaded tags whose category was revoked without withdraw', () => {
+    const { doc, reloads } = fakeDocument();
+    const consent = new ConsentState(new MemoryStorage());
+    const loader = new TagLoader(consent, tags, doc);
+    loader.start();
+    consent.acceptAll();
+    consent.set({ analytics: false, advertising: true });
+    expect(loader.revokedTags()).toEqual(['ga']);
+    loader.reloadOnWithdrawal();
+    expect(reloads).toHaveLength(1);
+  });
+
+  it('does not reload when every loaded tag is still allowed', () => {
+    const { doc, reloads } = fakeDocument();
+    const consent = new ConsentState(new MemoryStorage());
+    const loader = new TagLoader(consent, tags, doc);
+    loader.start();
+    consent.set({ analytics: true, advertising: false });
+    loader.reloadOnWithdrawal();
+    expect(loader.revokedTags()).toEqual([]);
+    expect(reloads).toHaveLength(0);
   });
 });

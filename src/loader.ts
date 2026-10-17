@@ -47,7 +47,13 @@ export class TagLoader {
     this.unsubscribe();
   }
 
+  revokedTags(): string[] {
+    return this.tags
+      .filter((tag) => this.loaded.has(tag.id) && !this.consent.allows(tag.category))
+      .map((tag) => tag.id);
+  }
+
   reloadOnWithdrawal(): void {
-    if (this.loaded.size > 0) this.doc.location.reload();
+    if (this.revokedTags().length > 0) this.doc.location.reload();
   }
 }
