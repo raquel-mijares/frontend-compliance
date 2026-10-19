@@ -71,6 +71,56 @@ describe('ConsentState', () => {
     expect(seen).toEqual([true, false]);
   });
 
+  describe('syncAcrossTabs', () => {
+    const storageEvent = (key: string | null, storageArea: Storage) =>
+      Object.assign(new Event('storage'), { key, storageArea });
+
+    it('picks up a revocation made in another tab and notifies subscribers', () => {
+      const tabs = new EventTarget();
+      const c = new ConsentState(storage);
+      c.acceptAll();
+      c.syncAcrossTabs(tabs);
+      const seen: boolean[] = [];
+      c.subscribe((s) => seen.push(s.allows('analytics')));
+
+      new ConsentState(storage).rejectAll();
+      tabs.dispatchEvent(storageEvent('consent', storage));
+
+      expect(c.get('analytics')).toBe('denied');
+      expect(seen).toEqual([false]);
+    });
+
+    it('goes back to unknown when another tab clears storage', () => {
+      const tabs = new EventTarget();
+      const c = new ConsentState(storage);
+      c.acceptAll();
+      c.syncAcrossTabs(tabs);
+
+      storage.clear();
+      tabs.dispatchEvent(storageEvent(null, storage));
+
+      expect(c.resolved).toBe(false);
+    });
+
+    it('ignores other keys, other storage areas and events after stopping', () => {
+      const tabs = new EventTarget();
+      const c = new ConsentState(storage);
+      c.acceptAll();
+      const stop = c.syncAcrossTabs(tabs);
+      const seen: unknown[] = [];
+      c.subscribe((s) => seen.push(s));
+
+      storage.removeItem('consent');
+      tabs.dispatchEvent(storageEvent('theme', storage));
+      tabs.dispatchEvent(storageEvent('consent', new MemoryStorage()));
+      stop();
+      tabs.dispatchEvent(storageEvent('consent', storage));
+
+      expect(seen).toEqual([]);
+      expect(c.allows('analytics')).toBe(true);
+    });
+  });
+
   it('does not blow up on corrupt storage', () => {
     storage.setItem('consent', '{no es json');
     const c = new ConsentState(storage);
