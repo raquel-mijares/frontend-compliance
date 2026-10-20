@@ -91,6 +91,18 @@ export class ConsentState {
     this.emit();
   }
 
+  syncAcrossTabs(target: EventTarget = window): () => void {
+    const onStorage = (event: Event) => {
+      const { key, storageArea } = event as StorageEvent;
+      if (storageArea !== this.storage) return;
+      if (key !== null && key !== STORAGE_KEY) return;
+      this.record = this.load();
+      this.emit();
+    };
+    target.addEventListener('storage', onStorage);
+    return () => target.removeEventListener('storage', onStorage);
+  }
+
   subscribe(fn: (s: ConsentState) => void): () => void {
     this.listeners.add(fn);
     return () => this.listeners.delete(fn);

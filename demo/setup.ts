@@ -29,5 +29,6 @@ export const tags = registry.for(audience);
 defineMetaQueue();
 
 export const consent = new ConsentState();
+consent.syncAcrossTabs();
 export const loader = new TagLoader(consent, tags);
 loader.start();
