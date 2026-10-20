@@ -5,6 +5,16 @@ import {
   readClickIds,
   toServerEvent,
 } from '../src/events';
+import { ConsentState } from '../src/consent';
+import { MemoryStorage } from './memory-storage';
+
+function consentWith(advertising: boolean) {
+  const consent = new ConsentState(new MemoryStorage());
+  consent.set({ analytics: true, advertising });
+  return consent;
+}
+
+const granted = consentWith(true);
 
 describe('event deduplication', () => {
   it('gives every event its own id', () => {
@@ -14,10 +24,10 @@ describe('event deduplication', () => {
 
   it('keeps the same event_id and event_name on both sides', async () => {
     const browser = browserEvent('Purchase', 'https://example.com/checkout');
-    const server = await toServerEvent(browser, { email: 'ana@example.com' });
+    const server = await toServerEvent(browser, { email: 'ana@example.com' }, granted);
 
-    expect(server.event_id).toBe(browser.eventId);
-    expect(server.event_name).toBe(browser.eventName);
+    expect(server!.event_id).toBe(browser.eventId);
+    expect(server!.event_name).toBe(browser.eventName);
   });
 
   it('sends event_time in seconds, not milliseconds', () => {
@@ -31,23 +41,23 @@ describe('event deduplication', () => {
     const server = await toServerEvent(browser, {
       email: 'ana@example.com',
       phone: '+1 403 555 0142',
-    });
+    }, granted);
 
     const serialized = JSON.stringify(server);
     expect(serialized).not.toContain('ana@example.com');
     expect(serialized).not.toContain('4035550142');
-    expect(server.user_data.em).toMatch(/^[a-f0-9]{64}$/);
+    expect(server!.user_data.em).toMatch(/^[a-f0-9]{64}$/);
   });
 
   it('normalizes before hashing so both sides match', async () => {
     const a = await toServerEvent(browserEvent('Lead', 'https://example.com'), {
       email: '  Ana@Example.COM ',
-    });
+    }, granted);
     const b = await toServerEvent(browserEvent('Lead', 'https://example.com'), {
       email: 'ana@example.com',
-    });
+    }, granted);
 
-    expect(a.user_data.em).toBe(b.user_data.em);
+    expect(a!.user_data.em).toBe(b!.user_data.em);
   });
 
   it('forwards fbp and fbc when present', async () => {
@@ -55,11 +65,20 @@ describe('event deduplication', () => {
     const server = await toServerEvent(
       browserEvent('Purchase', 'https://example.com'),
       {},
+      granted,
       clickIds,
     );
 
-    expect(server.user_data.fbp).toBe('fb.1.123.456');
-    expect(server.user_data.fbc).toBe('fb.1.123.abc');
+    expect(server!.user_data.fbp).toBe('fb.1.123.456');
+    expect(server!.user_data.fbc).toBe('fb.1.123.abc');
+  });
+
+  it('builds no server event without advertising consent', async () => {
+    const event = browserEvent('Purchase', 'https://example.com');
+    const user = { email: 'ana@example.com' };
+
+    expect(await toServerEvent(event, user, consentWith(false))).toBeNull();
+    expect(await toServerEvent(event, user, new ConsentState(new MemoryStorage()))).toBeNull();
   });
 
   it('ignores unrelated cookies', () => {
