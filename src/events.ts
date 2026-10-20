@@ -1,3 +1,4 @@
+import type { ConsentState } from './consent';
 import { hashUserData, type UserData } from './hash';
 
 export type EventName =
@@ -65,8 +66,11 @@ export function readClickIds(cookie: string): ClickIds {
 export async function toServerEvent(
   event: BrowserEvent,
   user: UserData,
+  consent: Pick<ConsentState, 'allows'>,
   clickIds: ClickIds = {},
-): Promise<ServerEvent> {
+): Promise<ServerEvent | null> {
+  if (!consent.allows('advertising')) return null;
+
   const user_data = await hashUserData(user);
   if (clickIds.fbp) user_data.fbp = clickIds.fbp;
   if (clickIds.fbc) user_data.fbc = clickIds.fbc;
