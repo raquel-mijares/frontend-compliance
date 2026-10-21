@@ -2,6 +2,7 @@ import { ConsentState } from '../src/consent';
 import { TagLoader } from '../src/loader';
 import { TagRegistry, type AudienceContext } from '../src/contexts';
 import { defineMetaQueue } from './meta-queue';
+import { bindGoogleConsentMode } from '../src/adapters/google';
 
 const registry = new TagRegistry();
 registry.register(
@@ -30,5 +31,12 @@ defineMetaQueue();
 
 export const consent = new ConsentState();
 consent.syncAcrossTabs();
+
+const globals = window as Window & { dataLayer?: unknown[] };
+globals.dataLayer ??= [];
+bindGoogleConsentMode(consent, function gtag() {
+  globals.dataLayer!.push(arguments);
+});
+
 export const loader = new TagLoader(consent, tags);
 loader.start();
