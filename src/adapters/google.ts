@@ -19,3 +19,13 @@ export function toGoogleConsentMode(consent: Pick<ConsentState, 'allows'>): Goog
     ad_personalization: ads,
   };
 }
+
+export type Gtag = (command: 'consent', action: 'default' | 'update', params: GoogleConsentMode) => void;
+
+export function bindGoogleConsentMode(
+  consent: Pick<ConsentState, 'allows' | 'subscribe'>,
+  gtag: Gtag,
+): () => void {
+  gtag('consent', 'default', toGoogleConsentMode(consent));
+  return consent.subscribe(() => gtag('consent', 'update', toGoogleConsentMode(consent)));
+}
