@@ -43,7 +43,7 @@ Runnable code, not pseudocode:
 
 ```bash
 npm install
-npm test                       # 48 unit tests
+npm test                       # 52 unit tests
 npx playwright install chromium
 npm run test:e2e               # 19 specs against the demo
 ```
