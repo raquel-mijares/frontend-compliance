@@ -41,4 +41,16 @@ describe('bindGoogleConsentMode', () => {
     c.acceptAll();
     expect(actions).toEqual(['default']);
   });
+
+  it('denies everything again when consent is withdrawn after accepting', () => {
+    const c = new ConsentState(new MemoryStorage());
+    const calls: [string, GoogleConsentMode][] = [];
+    bindGoogleConsentMode(c, (_cmd, action, params) => calls.push([action, params]));
+    c.acceptAll();
+    c.withdraw();
+    expect(calls.at(-1)).toEqual([
+      'update',
+      { analytics_storage: 'denied', ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied' },
+    ]);
+  });
 });

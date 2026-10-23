@@ -40,4 +40,13 @@ describe('bindMetaConsent', () => {
     c.acceptAll();
     expect(actions).toEqual(['revoke']);
   });
+
+  it('revokes again when consent is withdrawn after accepting', () => {
+    const c = new ConsentState(new MemoryStorage());
+    const actions: string[] = [];
+    bindMetaConsent(c, (_cmd, action) => actions.push(action));
+    c.acceptAll();
+    c.withdraw();
+    expect(actions).toEqual(['revoke', 'grant', 'revoke']);
+  });
 });
