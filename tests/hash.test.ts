@@ -31,6 +31,12 @@ describe('hashing user data', () => {
     expect(normalizePhone('000', '44')).toBe('');
   });
 
+  it('keeps the country code an international number already carries', () => {
+    expect(normalizePhone('+44 20 7946 0958')).toBe('442079460958');
+    expect(normalizePhone('0044 20 7946 0958')).toBe('442079460958');
+    expect(normalizePhone('+52 55 1234 5678', '44')).toBe('525512345678');
+  });
+
   it('lowercases names and strips accents', () => {
     expect(normalizeName('  José ')).toBe('jose');
     expect(normalizeName('ZOË')).toBe('zoe');

@@ -5,6 +5,7 @@ export function normalizeEmail(input: string): string {
 
 export function normalizePhone(input: string, countryCode = '1'): string {
   const digits = input.replace(/\D/g, '').replace(/^00/, '');
+  if (/^\s*(\+|00)/.test(input) && /^[1-9]/.test(digits)) return digits;
   if (digits.startsWith(countryCode)) return digits;
   const national = digits.replace(/^0+/, '');
   return national ? `${countryCode}${national}` : '';
