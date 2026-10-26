@@ -132,6 +132,7 @@ describe('ConsentState', () => {
     ['a record without categories', JSON.stringify({ version: POLICY_VERSION, timestamp: 'now' })],
     ['categories that are not booleans', JSON.stringify({ version: POLICY_VERSION, timestamp: 'now', categories: { analytics: 'yes', advertising: true } })],
     ['a missing timestamp', JSON.stringify({ version: POLICY_VERSION, categories: { analytics: true, advertising: true } })],
+    ['a timestamp that is not a date', JSON.stringify({ version: POLICY_VERSION, timestamp: 'yesterday', categories: { analytics: true, advertising: true } })],
   ])('ignores a stored value with %s', (_label, raw) => {
     storage.setItem('consent', raw);
     const c = new ConsentState(storage);
