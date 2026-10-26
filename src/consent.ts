@@ -21,6 +21,7 @@ export function isConsentRecord(value: unknown): value is ConsentRecord {
   return (
     record.version === POLICY_VERSION &&
     typeof record.timestamp === 'string' &&
+    !Number.isNaN(Date.parse(record.timestamp)) &&
     typeof categories === 'object' &&
     categories !== null &&
     typeof categories.analytics === 'boolean' &&
