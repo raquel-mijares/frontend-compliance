@@ -75,4 +75,31 @@ describe('TagLoader', () => {
     expect(loader.revokedTags()).toEqual([]);
     expect(reloads).toHaveLength(0);
   });
+
+  it('injects an async script with the tag src and its extra attributes', () => {
+    const appended: Array<{ async?: boolean; src?: string; attrs: Record<string, string> }> = [];
+    const doc = {
+      createElement: () => {
+        const attrs: Record<string, string> = {};
+        return { dataset: {}, attrs, setAttribute: (k: string, v: string) => (attrs[k] = v) };
+      },
+      head: { appendChild: (el: (typeof appended)[number]) => appended.push(el) },
+    } as unknown as Document;
+    const consent = new ConsentState(new MemoryStorage());
+    const tag: Tag = {
+      id: 'ga',
+      category: 'analytics',
+      src: 'https://example.com/ga.js',
+      attrs: { nonce: 'abc123', crossorigin: 'anonymous' },
+    };
+    new TagLoader(consent, [tag], doc).start();
+    consent.acceptAll();
+    expect(appended).toEqual([
+      expect.objectContaining({
+        async: true,
+        src: 'https://example.com/ga.js',
+        attrs: { nonce: 'abc123', crossorigin: 'anonymous' },
+      }),
+    ]);
+  });
 });

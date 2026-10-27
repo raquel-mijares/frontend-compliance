@@ -19,6 +19,7 @@ test.describe('consent dialog accessibility', () => {
 
   test('keeps focus inside the dialog while it is open', async ({ page }) => {
     await page.goto('/');
+    await expect(page.getByRole('button', { name: /reject/i })).toBeFocused();
 
     await page.keyboard.press('Tab');
     await expect(page.getByRole('button', { name: /accept/i })).toBeFocused();
