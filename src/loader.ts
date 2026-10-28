@@ -9,17 +9,16 @@ export interface Tag {
 
 export class TagLoader {
   private loaded = new Set<string>();
-  private unsubscribe: () => void;
+  private unsubscribe: (() => void) | null = null;
 
   constructor(
     private consent: ConsentState,
     private tags: Tag[],
     private doc: Document = document,
-  ) {
-    this.unsubscribe = this.consent.subscribe(() => this.sync());
-  }
+  ) {}
 
   start(): void {
+    this.unsubscribe ??= this.consent.subscribe(() => this.sync());
     this.sync();
   }
 
@@ -44,7 +43,8 @@ export class TagLoader {
   }
 
   dispose(): void {
-    this.unsubscribe();
+    this.unsubscribe?.();
+    this.unsubscribe = null;
   }
 
   revokedTags(): string[] {

@@ -43,6 +43,27 @@ describe('TagLoader', () => {
     expect(injected).toEqual(['ga', 'pixel']);
   });
 
+  it('injects nothing until start is called, even if consent is granted', () => {
+    const { doc, injected } = fakeDocument();
+    const consent = new ConsentState(new MemoryStorage());
+    const loader = new TagLoader(consent, tags, doc);
+    consent.acceptAll();
+    expect(injected).toEqual([]);
+    loader.start();
+    expect(injected).toEqual(['ga', 'pixel']);
+  });
+
+  it('can start again after dispose', () => {
+    const { doc, injected } = fakeDocument();
+    const consent = new ConsentState(new MemoryStorage());
+    const loader = new TagLoader(consent, tags, doc);
+    loader.start();
+    loader.dispose();
+    loader.start();
+    consent.set({ analytics: true, advertising: false });
+    expect(injected).toEqual(['ga']);
+  });
+
   it('stops reacting to consent changes after dispose', () => {
     const { doc, injected } = fakeDocument();
     const consent = new ConsentState(new MemoryStorage());
