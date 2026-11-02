@@ -58,6 +58,12 @@ describe('hashing user data', () => {
     });
   });
 
+  it('hashes a national phone number with the country code it is given', async () => {
+    expect(await hashUserData({ phone: '020 7946 0958' }, '44')).toEqual({
+      ph: await sha256('442079460958'),
+    });
+  });
+
   it('leaves out fields that were not provided', async () => {
     expect(Object.keys(await hashUserData({ email: 'ana@example.com' }))).toEqual(['em']);
     expect(await hashUserData({})).toEqual({});

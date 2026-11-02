@@ -36,13 +36,14 @@ export interface UserData {
 
 export async function hashUserData(
   user: UserData,
+  countryCode = '1',
 ): Promise<Record<string, string>> {
   const out: Record<string, string> = {};
   const add = async (key: string, value: string) => {
     if (value) out[key] = await sha256(value);
   };
   await add('em', normalizeEmail(user.email ?? ''));
-  await add('ph', normalizePhone(user.phone ?? ''));
+  await add('ph', normalizePhone(user.phone ?? '', countryCode));
   await add('fn', normalizeName(user.firstName ?? ''));
   await add('ln', normalizeName(user.lastName ?? ''));
   return out;
