@@ -42,6 +42,14 @@ describe('ConsentState', () => {
     expect(Date.parse(saved.timestamp)).not.toBeNaN();
   });
 
+  it('keeps its own copy of the categories passed to set', () => {
+    const c = new ConsentState(storage);
+    const categories = { analytics: true, advertising: false };
+    c.set(categories);
+    categories.advertising = true;
+    expect(c.allows('advertising')).toBe(false);
+  });
+
   it('invalidates consent from an earlier policy version', () => {
     storage.setItem('consent', JSON.stringify({
       version: POLICY_VERSION - 1,

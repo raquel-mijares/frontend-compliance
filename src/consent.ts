@@ -66,7 +66,10 @@ export class ConsentState {
     this.record = {
       version: POLICY_VERSION,
       timestamp: new Date().toISOString(),
-      categories,
+      categories: {
+        analytics: categories.analytics,
+        advertising: categories.advertising,
+      },
     };
     try {
       this.storage.setItem(STORAGE_KEY, JSON.stringify(this.record));
