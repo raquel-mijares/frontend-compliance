@@ -123,4 +123,36 @@ describe('TagLoader', () => {
       }),
     ]);
   });
+
+  it('does not let extra attributes replace the tag src, async or id', () => {
+    const appended: Array<Record<string, unknown>> = [];
+    const doc = {
+      createElement: () => {
+        const el: Record<string, unknown> = { dataset: {} };
+        el.setAttribute = (k: string, v: string) => {
+          if (k === 'data-tag-id') (el.dataset as Record<string, string>).tagId = v;
+          else el[k] = k === 'async' ? v !== 'false' : v;
+        };
+        return el;
+      },
+      head: { appendChild: (el: Record<string, unknown>) => appended.push(el) },
+    } as unknown as Document;
+    const consent = new ConsentState(new MemoryStorage());
+    const tag: Tag = {
+      id: 'ga',
+      category: 'analytics',
+      src: 'https://example.com/ga.js',
+      attrs: { src: 'https://other.example/x.js', async: 'false', 'data-tag-id': 'other', nonce: 'abc123' },
+    };
+    new TagLoader(consent, [tag], doc).start();
+    consent.acceptAll();
+    expect(appended).toEqual([
+      expect.objectContaining({
+        async: true,
+        src: 'https://example.com/ga.js',
+        dataset: { tagId: 'ga' },
+        nonce: 'abc123',
+      }),
+    ]);
+  });
 });
