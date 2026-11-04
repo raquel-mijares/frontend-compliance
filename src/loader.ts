@@ -32,12 +32,12 @@ export class TagLoader {
 
   private inject(tag: Tag): void {
     const el = this.doc.createElement('script');
-    el.async = true;
-    el.src = tag.src;
-    el.dataset.tagId = tag.id;
     for (const [k, v] of Object.entries(tag.attrs ?? {})) {
       el.setAttribute(k, v);
     }
+    el.async = true;
+    el.src = tag.src;
+    el.dataset.tagId = tag.id;
     this.doc.head.appendChild(el);
     this.loaded.add(tag.id);
   }
