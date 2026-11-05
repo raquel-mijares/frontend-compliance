@@ -129,6 +129,32 @@ describe('ConsentState', () => {
     });
   });
 
+  it('keeps the decision in memory and notifies when storage cannot be written', () => {
+    storage.setItem = () => {
+      throw new DOMException('quota exceeded', 'QuotaExceededError');
+    };
+    const c = new ConsentState(storage);
+    let calls = 0;
+    c.subscribe(() => calls++);
+
+    expect(() => c.rejectAll()).not.toThrow();
+    expect(c.get('analytics')).toBe('denied');
+    expect(c.resolved).toBe(true);
+    expect(calls).toBe(1);
+  });
+
+  it('still withdraws in memory when storage cannot be cleared', () => {
+    const c = new ConsentState(storage);
+    c.acceptAll();
+    storage.removeItem = () => {
+      throw new DOMException('blocked', 'SecurityError');
+    };
+
+    expect(() => c.withdraw()).not.toThrow();
+    expect(c.get('advertising')).toBe('unknown');
+    expect(c.resolved).toBe(false);
+  });
+
   it('does not blow up on corrupt storage', () => {
     storage.setItem('consent', '{no es json');
     const c = new ConsentState(storage);
