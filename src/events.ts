@@ -82,6 +82,6 @@ export async function toServerEvent(
     action_source: 'website',
     event_source_url: event.sourceUrl,
     user_data,
-    custom_data: event.custom,
+    custom_data: event.custom ? { ...event.custom } : undefined,
   };
 }
