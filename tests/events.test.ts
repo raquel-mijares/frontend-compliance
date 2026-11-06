@@ -73,6 +73,15 @@ describe('event deduplication', () => {
     expect(server!.user_data.fbc).toBe('fb.1.123.abc');
   });
 
+  it('copies custom data so later changes to the browser event do not leak into the server payload', async () => {
+    const browser = browserEvent('Purchase', 'https://example.com', { value: 40, currency: 'CAD' });
+    const server = await toServerEvent(browser, {}, granted);
+
+    browser.custom!.value = 999;
+
+    expect(server!.custom_data).toEqual({ value: 40, currency: 'CAD' });
+  });
+
   it('builds no server event without advertising consent', async () => {
     const event = browserEvent('Purchase', 'https://example.com');
     const user = { email: 'ana@example.com' };
