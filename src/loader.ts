@@ -15,7 +15,15 @@ export class TagLoader {
     private consent: ConsentState,
     private tags: Tag[],
     private doc: Document = document,
-  ) {}
+  ) {
+    const ids = new Set<string>();
+    for (const tag of tags) {
+      if (ids.has(tag.id)) {
+        throw new Error(`Tag "${tag.id}" is listed more than once`);
+      }
+      ids.add(tag.id);
+    }
+  }
 
   start(): void {
     this.unsubscribe ??= this.consent.subscribe(() => this.sync());
