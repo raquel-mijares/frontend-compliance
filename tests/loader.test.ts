@@ -20,6 +20,13 @@ const tags: Tag[] = [
 ];
 
 describe('TagLoader', () => {
+  it('rejects two tags with the same id', () => {
+    const { doc } = fakeDocument();
+    const consent = new ConsentState(new MemoryStorage());
+    const duplicate: Tag = { id: 'ga', category: 'advertising', src: 'https://example.com/other.js' };
+    expect(() => new TagLoader(consent, [...tags, duplicate], doc)).toThrow(/"ga" is listed more than once/);
+  });
+
   it('injects nothing before a decision', () => {
     const { doc, injected } = fakeDocument();
     new TagLoader(new ConsentState(new MemoryStorage()), tags, doc).start();
