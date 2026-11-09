@@ -79,6 +79,18 @@ describe('ConsentState', () => {
     expect(seen).toEqual([true, false]);
   });
 
+  it('still notifies every subscriber when one throws, then rethrows', () => {
+    const c = new ConsentState(storage);
+    const seen: boolean[] = [];
+    c.subscribe(() => {
+      throw new Error('broken listener');
+    });
+    c.subscribe((s) => seen.push(s.allows('analytics')));
+    expect(() => c.acceptAll()).toThrow('broken listener');
+    expect(seen).toEqual([true]);
+    expect(c.allows('analytics')).toBe(true);
+  });
+
   describe('syncAcrossTabs', () => {
     const storageEvent = (key: string | null, storageArea: Storage) =>
       Object.assign(new Event('storage'), { key, storageArea });
