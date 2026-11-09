@@ -113,6 +113,15 @@ export class ConsentState {
   }
 
   private emit(): void {
-    for (const fn of this.listeners) fn(this);
+    const errors: unknown[] = [];
+    for (const fn of this.listeners) {
+      try {
+        fn(this);
+      } catch (error) {
+        errors.push(error);
+      }
+    }
+    if (errors.length === 1) throw errors[0];
+    if (errors.length > 1) throw new AggregateError(errors, 'Consent listeners failed');
   }
 }
