@@ -10,12 +10,14 @@ export interface Tag {
 export class TagLoader {
   private loaded = new Set<string>();
   private unsubscribe: (() => void) | null = null;
+  private readonly tags: readonly Tag[];
 
   constructor(
     private consent: ConsentState,
-    private tags: Tag[],
+    tags: readonly Tag[],
     private doc: Document = document,
   ) {
+    this.tags = [...tags];
     const ids = new Set<string>();
     for (const tag of tags) {
       if (ids.has(tag.id)) {
