@@ -27,6 +27,17 @@ describe('TagLoader', () => {
     expect(() => new TagLoader(consent, [...tags, duplicate], doc)).toThrow(/"ga" is listed more than once/);
   });
 
+  it('keeps its own copy of the tag list so tags added later are never loaded unchecked', () => {
+    const { doc, injected } = fakeDocument();
+    const consent = new ConsentState(new MemoryStorage());
+    const list = [...tags];
+    const loader = new TagLoader(consent, list, doc);
+    list.push({ id: 'late', category: 'advertising', src: 'https://example.com/late.js' });
+    consent.acceptAll();
+    loader.start();
+    expect(injected).toEqual(['ga', 'pixel']);
+  });
+
   it('injects nothing before a decision', () => {
     const { doc, injected } = fakeDocument();
     new TagLoader(new ConsentState(new MemoryStorage()), tags, doc).start();
