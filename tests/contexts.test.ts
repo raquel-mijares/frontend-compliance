@@ -38,4 +38,19 @@ describe('TagRegistry', () => {
     r.register(analytics, ['general']);
     expect(() => r.register(analytics, ['kids'])).toThrow(/already registered/);
   });
+
+  it('keeps the kids check when the original tag is changed after registering', () => {
+    const r = new TagRegistry();
+    const tag: Tag = { ...aggregate };
+    r.register(tag, ['kids']);
+    tag.category = 'advertising';
+    expect(r.for('kids').map((t) => t.category)).toEqual(['analytics']);
+  });
+
+  it('keeps the kids check when a returned tag is changed', () => {
+    const r = new TagRegistry();
+    r.register(aggregate, ['kids']);
+    r.for('kids')[0]!.category = 'advertising';
+    expect(r.for('kids').map((t) => t.category)).toEqual(['analytics']);
+  });
 });
