@@ -6,6 +6,7 @@ import {
   toServerEvent,
 } from '../src/events';
 import { ConsentState } from '../src/consent';
+import { sha256 } from '../src/hash';
 import { MemoryStorage } from './memory-storage';
 
 function consentWith(advertising: boolean) {
@@ -58,6 +59,18 @@ describe('event deduplication', () => {
     }, granted);
 
     expect(a!.user_data.em).toBe(b!.user_data.em);
+  });
+
+  it('uses the site country code for local phone numbers', async () => {
+    const server = await toServerEvent(
+      browserEvent('Lead', 'https://example.mx'),
+      { phone: '55 1234 5678' },
+      granted,
+      {},
+      '52',
+    );
+
+    expect(server!.user_data.ph).toBe(await sha256('525512345678'));
   });
 
   it('forwards fbp and fbc when present', async () => {

@@ -68,10 +68,11 @@ export async function toServerEvent(
   user: UserData,
   consent: Pick<ConsentState, 'allows'>,
   clickIds: ClickIds = {},
+  countryCode = '1',
 ): Promise<ServerEvent | null> {
   if (!consent.allows('advertising')) return null;
 
-  const user_data = await hashUserData(user);
+  const user_data = await hashUserData(user, countryCode);
   if (clickIds.fbp) user_data.fbp = clickIds.fbp;
   if (clickIds.fbc) user_data.fbc = clickIds.fbc;
 
