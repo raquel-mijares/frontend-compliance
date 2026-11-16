@@ -42,6 +42,17 @@ describe('bindGoogleConsentMode', () => {
     expect(actions).toEqual(['default']);
   });
 
+  it('skips the update when a new decision leaves every signal the same', () => {
+    const c = new ConsentState(new MemoryStorage());
+    const actions: string[] = [];
+    bindGoogleConsentMode(c, (_cmd, action) => actions.push(action));
+    c.acceptAll();
+    c.acceptAll();
+    c.rejectAll();
+    c.withdraw();
+    expect(actions).toEqual(['default', 'update', 'update']);
+  });
+
   it('denies everything again when consent is withdrawn after accepting', () => {
     const c = new ConsentState(new MemoryStorage());
     const calls: [string, GoogleConsentMode][] = [];
