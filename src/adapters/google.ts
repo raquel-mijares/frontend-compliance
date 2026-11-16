@@ -26,6 +26,13 @@ export function bindGoogleConsentMode(
   consent: Pick<ConsentState, 'allows' | 'subscribe'>,
   gtag: Gtag,
 ): () => void {
-  gtag('consent', 'default', toGoogleConsentMode(consent));
-  return consent.subscribe(() => gtag('consent', 'update', toGoogleConsentMode(consent)));
+  let last = toGoogleConsentMode(consent);
+  gtag('consent', 'default', last);
+  return consent.subscribe(() => {
+    const next = toGoogleConsentMode(consent);
+    const changed = (Object.keys(next) as (keyof GoogleConsentMode)[]).some((key) => next[key] !== last[key]);
+    if (!changed) return;
+    last = next;
+    gtag('consent', 'update', next);
+  });
 }
