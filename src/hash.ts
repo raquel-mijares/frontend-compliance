@@ -16,7 +16,8 @@ export function normalizeName(input: string): string {
     .trim()
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\p{P}/gu, '');
 }
 
 export async function sha256(input: string): Promise<string> {
