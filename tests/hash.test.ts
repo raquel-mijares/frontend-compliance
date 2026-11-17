@@ -42,6 +42,11 @@ describe('hashing user data', () => {
     expect(normalizeName('ZOË')).toBe('zoe');
   });
 
+  it('removes punctuation from names', () => {
+    expect(normalizeName("O'Brien")).toBe('obrien');
+    expect(normalizeName('Mary-Jane')).toBe('maryjane');
+  });
+
   it('hashes each field under the key the conversion API expects', async () => {
     const out = await hashUserData({
       email: 'Ana@Example.com',
