@@ -28,4 +28,4 @@ Only `main`. There are no releases.
 
 Dependabot opens weekly update PRs for npm packages and GitHub Actions. Every
 update goes through the same required checks as any other change — typecheck,
-unit tests, e2e and `npm audit --audit-level=high` — before it can merge.
+unit tests, e2e and `npm audit --omit=dev --audit-level=high` — before it can merge.
