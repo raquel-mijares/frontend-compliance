@@ -41,6 +41,18 @@ describe('bindMetaConsent', () => {
     expect(actions).toEqual(['revoke']);
   });
 
+  it('skips the call when a new decision leaves advertising the same', () => {
+    const c = new ConsentState(new MemoryStorage());
+    const actions: string[] = [];
+    bindMetaConsent(c, (_cmd, action) => actions.push(action));
+    c.set({ analytics: true, advertising: false });
+    c.acceptAll();
+    c.acceptAll();
+    c.rejectAll();
+    c.withdraw();
+    expect(actions).toEqual(['revoke', 'grant', 'revoke']);
+  });
+
   it('revokes again when consent is withdrawn after accepting', () => {
     const c = new ConsentState(new MemoryStorage());
     const actions: string[] = [];

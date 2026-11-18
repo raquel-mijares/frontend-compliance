@@ -12,6 +12,12 @@ export function bindMetaConsent(
   consent: Pick<ConsentState, 'allows' | 'subscribe'>,
   fbq: Fbq,
 ): () => void {
-  fbq('consent', toMetaConsent(consent));
-  return consent.subscribe(() => fbq('consent', toMetaConsent(consent)));
+  let last = toMetaConsent(consent);
+  fbq('consent', last);
+  return consent.subscribe(() => {
+    const next = toMetaConsent(consent);
+    if (next === last) return;
+    last = next;
+    fbq('consent', next);
+  });
 }
