@@ -86,8 +86,9 @@ the update and there's a window where it fired in granted mode.
 
 In this repo the mapping lives in [`src/adapters/google.ts`](../src/adapters/google.ts):
 `toGoogleConsentMode(consent)` builds the `update` payload, and the consent state
-itself never imports a vendor. Adding Meta or TikTok is a new adapter, not an edit
-to `ConsentState`.
+itself never imports a vendor, and `bindGoogleConsentMode(consent, gtag)` sends
+the `default` right away and an `update` only when a signal actually changes.
+Adding a vendor is a new adapter, not an edit to `ConsentState`.
 
 ```js
 gtag('consent', 'default', {
@@ -96,6 +97,21 @@ gtag('consent', 'default', {
   ad_user_data: 'denied',
   ad_personalization: 'denied',
 });
+```
+
+## Meta Pixel
+
+Meta has a single switch: `fbq('consent', 'revoke')` before `fbq('init', ...)`
+holds every event back, and `fbq('consent', 'grant')` releases them. Only the
+advertising category decides it; allowing analytics alone still means `revoke`.
+
+The mapping lives in [`src/adapters/meta.ts`](../src/adapters/meta.ts):
+`bindMetaConsent(consent, fbq)` sends `revoke` until there is a decision, then
+`grant` or `revoke` only when that answer changes.
+
+```js
+fbq('consent', 'revoke');
+fbq('init', PIXEL_ID);
 ```
 
 ## How you prove it
